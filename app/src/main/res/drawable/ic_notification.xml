@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+SPDX-FileCopyrightText: 2026 Chris Palmer <chris@red-oxide.org>
+SPDX-License-Identifier: CC-BY-SA-4.0
+-->
+<!-- Status bar icon for the unread count: home plate with headlines, in
+     white, as notification icons must be. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="256" android:viewportHeight="256">
+  <path android:pathData="M60,60 H196 V128 L128,196 L60,128 Z" android:strokeColor="#FFFFFF" android:strokeWidth="18" android:strokeLineJoin="round"/>
+  <path android:pathData="M88,98 H168 M98,124 H158 M112,150 H144" android:strokeColor="#FFFFFF" android:strokeWidth="16" android:strokeLineCap="round"/>
+</vector>

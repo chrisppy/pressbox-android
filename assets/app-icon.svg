@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+SPDX-FileCopyrightText: 2026 Chris Palmer <chris@red-oxide.org>
+SPDX-License-Identifier: CC-BY-SA-4.0
+-->
+<!-- The app icon, as in pressbox-ios. On Android it is an adaptive icon:
+     app/src/main/res/drawable/ic_launcher_foreground.xml holds these paths
+     (scaled into the safe zone) over the black field as the background
+     layer, and ic_launcher_monochrome.xml is the same in white for themed
+     icons.
+     pressbox: home plate (in true proportions: square-cornered top half,
+     45° edges to the point) holding the day's headlines, which taper with
+     it. Birdland colors: cream plate, Orioles oranges, black field. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title id="title">pressbox</title>
+  <rect width="256" height="256" fill="#0b0b0b"/>
+  <path d="M60 60 H196 V128 L128 196 L60 128 Z" fill="none" stroke="#e5dfd2" stroke-width="14" stroke-linejoin="round"/>
+  <g fill="none" stroke-linecap="round" stroke-width="13">
+    <path d="M88 98 H168" stroke="#ff7a1a"/>
+    <path d="M98 124 H158" stroke="#ff7a1a"/>
+    <path d="M112 150 H144" stroke="#df4601"/>
+  </g>
+</svg>

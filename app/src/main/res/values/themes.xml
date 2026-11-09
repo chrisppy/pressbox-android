@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+SPDX-FileCopyrightText: 2026 Chris Palmer <chris@red-oxide.org>
+SPDX-License-Identifier: MPL-2.0
+-->
+<!-- The window behind Compose, so launching doesn't flash white in dark
+     mode. Compose draws everything else (Theme.kt). Birdland Light here,
+     Birdland in values-night. -->
+<resources>
+  <style name="Theme.Pressbox" parent="android:Theme.Material.Light.NoActionBar">
+    <item name="android:windowBackground">@color/background</item>
+    <item name="android:statusBarColor">@android:color/transparent</item>
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+    <item name="android:windowSplashScreenBackground">@color/background</item>
+  </style>
+</resources>

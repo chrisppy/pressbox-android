@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+SPDX-FileCopyrightText: 2026 Chris Palmer <chris@red-oxide.org>
+SPDX-License-Identifier: MPL-2.0
+-->
+<!-- Nothing is backed up or transferred: the token is bound to this
+     device's keystore, and the cache is rebuilt from the server. -->
+<data-extraction-rules>
+  <cloud-backup>
+    <exclude domain="root"/>
+    <exclude domain="file"/>
+    <exclude domain="database"/>
+    <exclude domain="sharedpref"/>
+    <exclude domain="external"/>
+  </cloud-backup>
+  <device-transfer>
+    <exclude domain="root"/>
+    <exclude domain="file"/>
+    <exclude domain="database"/>
+    <exclude domain="sharedpref"/>
+    <exclude domain="external"/>
+  </device-transfer>
+</data-extraction-rules>

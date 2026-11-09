@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+SPDX-FileCopyrightText: 2026 Chris Palmer <chris@red-oxide.org>
+SPDX-License-Identifier: MPL-2.0
+-->
+<!-- Plain http is allowed so a server on the local network or a tailnet
+     works without certificates, as on iOS. Android can't limit it to local
+     addresses, so the app warns when an http address isn't local; use https
+     for anything else, e.g. `tailscale serve`. Only the system's CAs are
+     trusted. -->
+<network-security-config>
+  <base-config cleartextTrafficPermitted="true">
+    <trust-anchors>
+      <certificates src="system"/>
+    </trust-anchors>
+  </base-config>
+</network-security-config>

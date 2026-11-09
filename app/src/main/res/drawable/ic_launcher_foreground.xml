@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+SPDX-FileCopyrightText: 2026 Chris Palmer <chris@red-oxide.org>
+SPDX-License-Identifier: CC-BY-SA-4.0
+-->
+<!-- The logo from assets/app-icon.svg (a 256 unit square), scaled to 75%
+     about the centre so home plate's corners stay inside the adaptive
+     icon's safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="256" android:viewportHeight="256">
+  <group android:pivotX="128" android:pivotY="128" android:scaleX="0.75" android:scaleY="0.75">
+    <path android:pathData="M60,60 H196 V128 L128,196 L60,128 Z" android:strokeColor="#E5DFD2" android:strokeWidth="14" android:strokeLineJoin="round"/>
+    <path android:pathData="M88,98 H168" android:strokeColor="#FF7A1A" android:strokeWidth="13" android:strokeLineCap="round"/>
+    <path android:pathData="M98,124 H158" android:strokeColor="#FF7A1A" android:strokeWidth="13" android:strokeLineCap="round"/>
+    <path android:pathData="M112,150 H144" android:strokeColor="#DF4601" android:strokeWidth="13" android:strokeLineCap="round"/>
+  </group>
+</vector>
