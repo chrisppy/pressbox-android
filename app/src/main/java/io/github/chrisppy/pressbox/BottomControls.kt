@@ -42,23 +42,25 @@ import androidx.compose.ui.unit.dp
  * window); side by side, there is nothing to go back to.
  */
 class Navigation(
-  /** Up one screen. */
-  val back: () -> Unit,
-  /** Straight to the feed list, when that is more than one screen up. */
-  val home: (() -> Unit)? = null,
+    /** Up one screen. */
+    val back: () -> Unit,
+    /** Straight to the feed list, when that is more than one screen up. */
+    val home: (() -> Unit)? = null,
 )
 
 val LocalNavigation = compositionLocalOf<Navigation?> { null }
 
-/** The screen's controls, together in one group centred in the bottom bar: Back (and Home) first. */
+/**
+ * The screen's controls, together in one group centred in the bottom bar: Back (and Home) first.
+ */
 @Composable
 fun BottomControls(buttons: @Composable RowScope.() -> Unit) {
   val navigation = LocalNavigation.current
   BottomAppBar(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
     Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.Center,
-      verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
       if (navigation != null) {
         Action("Back", Icons.AutoMirrored.Filled.ArrowBack, onClick = navigation.back)
@@ -74,16 +76,16 @@ fun BottomControls(buttons: @Composable RowScope.() -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Action(
-  label: String,
-  icon: ImageVector,
-  enabled: Boolean = true,
-  tint: Color? = null,
-  onClick: () -> Unit,
+    label: String,
+    icon: ImageVector,
+    enabled: Boolean = true,
+    tint: Color? = null,
+    onClick: () -> Unit,
 ) {
   TooltipBox(
-    positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
-    tooltip = { PlainTooltip { Text(label) } },
-    state = rememberTooltipState(),
+      positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+      tooltip = { PlainTooltip { Text(label) } },
+      state = rememberTooltipState(),
   ) {
     IconButton(onClick = onClick, enabled = enabled) {
       if (tint != null && enabled) Icon(icon, contentDescription = label, tint = tint)
@@ -97,17 +99,17 @@ fun Action(
 fun StatusBanner(text: String, error: Boolean, modifier: Modifier = Modifier) {
   val palette = Theme.palette
   Surface(
-    modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-    shape = RoundedCornerShape(50),
-    color = if (error) palette.error else MaterialTheme.colorScheme.surfaceContainerHighest,
-    contentColor = if (error) Color.White else palette.text,
-    tonalElevation = 3.dp,
-    shadowElevation = 3.dp,
+      modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+      shape = RoundedCornerShape(50),
+      color = if (error) palette.error else MaterialTheme.colorScheme.surfaceContainerHighest,
+      contentColor = if (error) Color.White else palette.text,
+      tonalElevation = 3.dp,
+      shadowElevation = 3.dp,
   ) {
     Text(
-      text,
-      style = MaterialTheme.typography.bodySmall,
-      modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+        text,
+        style = MaterialTheme.typography.bodySmall,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
     )
   }
 }

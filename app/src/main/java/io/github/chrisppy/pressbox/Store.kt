@@ -126,12 +126,12 @@ class Store(app: Application) : AndroidViewModel(app) {
     get() = ApiClient(server, token)
 
   fun title(source: Source): String =
-    when (source) {
-      Source.All -> "All items"
-      Source.Starred -> "Starred"
-      is Source.OfFeed -> feedTitle(source.id)
-      is Source.Tagged -> source.tag
-    }
+      when (source) {
+        Source.All -> "All items"
+        Source.Starred -> "Starred"
+        is Source.OfFeed -> feedTitle(source.id)
+        is Source.Tagged -> source.tag
+      }
 
   fun feedTitle(id: String): String = feeds.firstOrNull { it.id == id }?.title ?: id
 
@@ -258,11 +258,10 @@ class Store(app: Application) : AndroidViewModel(app) {
     run {
       api.setRead(item.id, value)
       update(item.id) { it.copy(read = value) }
-      feeds =
-        feeds.map {
-          if (it.id == item.feedId) it.copy(unread = maxOf(0, it.unread + if (value) -1 else 1))
-          else it
-        }
+      feeds = feeds.map {
+        if (it.id == item.feedId) it.copy(unread = maxOf(0, it.unread + if (value) -1 else 1))
+        else it
+      }
     }
     updateUnread()
   }
@@ -278,12 +277,12 @@ class Store(app: Application) : AndroidViewModel(app) {
 
   fun markAllRead() = launch {
     val targets =
-      when (val source = source) {
-        is Source.OfFeed -> listOf(source.id)
-        is Source.Tagged -> feedsTagged(source.tag).filter { it.unread > 0 }.map { it.id }
-        Source.All -> feeds.filter { it.unread > 0 }.map { it.id }
-        else -> return@launch
-      }
+        when (val source = source) {
+          is Source.OfFeed -> listOf(source.id)
+          is Source.Tagged -> feedsTagged(source.tag).filter { it.unread > 0 }.map { it.id }
+          Source.All -> feeds.filter { it.unread > 0 }.map { it.id }
+          else -> return@launch
+        }
     run { for (id in targets) api.markFeedRead(id) }
     reload()
   }
@@ -308,35 +307,34 @@ class Store(app: Application) : AndroidViewModel(app) {
     pairCode = null
     pairStatus = "Contacting the server…"
     val client = ApiClient(server, null)
-    pairJob =
-      viewModelScope.launch {
-        try {
-          val start = client.pairStart(name)
-          pairCode = start.code
-          pairStatus = "Waiting for approval…"
-          val deadline = System.currentTimeMillis() + start.expiresIn * 1000L
-          while (System.currentTimeMillis() < deadline) {
-            delay(2000)
-            val approved = client.pairPoll(start.pollId)
-            if (approved != null) {
-              setToken(approved.token)
-              me = null
-              pairCode = null
-              pairStatus = "Paired as ${approved.name}."
-              reload()
-              if (errorMessage == null) showSettings = false
-              return@launch
-            }
+    pairJob = viewModelScope.launch {
+      try {
+        val start = client.pairStart(name)
+        pairCode = start.code
+        pairStatus = "Waiting for approval…"
+        val deadline = System.currentTimeMillis() + start.expiresIn * 1000L
+        while (System.currentTimeMillis() < deadline) {
+          delay(2000)
+          val approved = client.pairPoll(start.pollId)
+          if (approved != null) {
+            setToken(approved.token)
+            me = null
+            pairCode = null
+            pairStatus = "Paired as ${approved.name}."
+            reload()
+            if (errorMessage == null) showSettings = false
+            return@launch
           }
-          pairCode = null
-          pairStatus = "The code expired. Try again."
-        } catch (e: CancellationException) {
-          throw e
-        } catch (e: Exception) {
-          pairCode = null
-          pairStatus = e.message ?: e.toString()
         }
+        pairCode = null
+        pairStatus = "The code expired. Try again."
+      } catch (e: CancellationException) {
+        throw e
+      } catch (e: Exception) {
+        pairCode = null
+        pairStatus = e.message ?: e.toString()
       }
+    }
   }
 
   fun cancelPairing() {

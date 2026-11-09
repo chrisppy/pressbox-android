@@ -11,17 +11,17 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Feed(
-  val id: String,
-  val title: String,
-  val url: String,
-  @SerialName("site_url") val siteUrl: String? = null,
-  val tags: List<String> = emptyList(),
-  val unread: Int,
-  val total: Int,
-  @SerialName("last_fetched") val lastFetched: Long? = null,
-  @SerialName("last_error") val lastError: String? = null,
-  /** Removed from the server config but kept for its starred items. */
-  val archived: Boolean? = null,
+    val id: String,
+    val title: String,
+    val url: String,
+    @SerialName("site_url") val siteUrl: String? = null,
+    val tags: List<String> = emptyList(),
+    val unread: Int,
+    val total: Int,
+    @SerialName("last_fetched") val lastFetched: Long? = null,
+    @SerialName("last_error") val lastError: String? = null,
+    /** Removed from the server config but kept for its starred items. */
+    val archived: Boolean? = null,
 ) {
   val isArchived: Boolean
     get() = archived ?: false
@@ -29,24 +29,24 @@ data class Feed(
 
 @Serializable
 data class Item(
-  val id: Long,
-  @SerialName("feed_id") val feedId: String,
-  val title: String,
-  val url: String? = null,
-  val author: String? = null,
-  val summary: String? = null,
-  val content: String? = null,
-  val published: Long,
-  val read: Boolean,
-  val starred: Boolean,
+    val id: Long,
+    @SerialName("feed_id") val feedId: String,
+    val title: String,
+    val url: String? = null,
+    val author: String? = null,
+    val summary: String? = null,
+    val content: String? = null,
+    val published: Long,
+    val read: Boolean,
+    val starred: Boolean,
 )
 
 @Serializable
 data class ItemPage(
-  val items: List<Item>,
-  @SerialName("next_cursor") val nextCursor: String? = null,
-  /** Only from servers too old to give cursors. */
-  @SerialName("next_offset") val nextOffset: Int? = null,
+    val items: List<Item>,
+    @SerialName("next_cursor") val nextCursor: String? = null,
+    /** Only from servers too old to give cursors. */
+    @SerialName("next_offset") val nextOffset: Int? = null,
 ) {
   val next: NextPage?
     get() = nextCursor?.let { NextPage.Cursor(it) } ?: nextOffset?.let { NextPage.Offset(it) }
@@ -67,9 +67,9 @@ sealed interface NextPage {
 
 @Serializable
 data class PairStart(
-  val code: String,
-  @SerialName("poll_id") val pollId: String,
-  @SerialName("expires_in") val expiresIn: Int,
+    val code: String,
+    @SerialName("poll_id") val pollId: String,
+    @SerialName("expires_in") val expiresIn: Int,
 )
 
 @Serializable data class PairApproved(val token: String, val name: String)

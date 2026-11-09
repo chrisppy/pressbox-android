@@ -18,10 +18,10 @@ starred state with the other clients, such as the `pressbox` terminal reader and
 ## Requirements
 
 - Android 12 (API 31) or later.
-- A pressbox server the phone can reach. https is best; `tailscale serve --bg
-  8470` on the server is the least work, and a reverse proxy with ACME works
-  too. Plain http works, and the app warns when an http address isn't on the
-  local network or a tailnet.
+- A pressbox server the phone can reach. https is best;
+  `tailscale serve --bg 8470` on the server is the least work, and a reverse
+  proxy with ACME works too. Plain http works, and the app warns when an http
+  address isn't on the local network or a tailnet.
 - To build: JDK 17 and the Android SDK (platform 36), or `nix develop`, which
   provides both. Gradle comes from the wrapper.
 
@@ -97,7 +97,7 @@ just verify    # check formatting, then nix flake check (formatting, reuse lint)
 ```
 
 | File | What it does |
-| --- | --- |
+| ------------------- | ------------------------------------------------------- |
 | `Models.kt` | JSON shapes of the API |
 | `ApiClient.kt` | HTTP client (OkHttp, kotlinx.serialization) |
 | `Store.kt` | App state shared by every screen |

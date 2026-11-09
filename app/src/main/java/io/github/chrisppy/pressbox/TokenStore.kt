@@ -33,21 +33,22 @@ object TokenStore {
     }
     val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
     generator.init(
-      KeyGenParameterSpec.Builder(
-          ALIAS,
-          KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
-        )
-        .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-        .setKeySize(256)
-        .build()
+        KeyGenParameterSpec.Builder(
+                ALIAS,
+                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
+            )
+            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+            .setKeySize(256)
+            .build()
     )
     return generator.generateKey()
   }
 
   fun token(context: Context): String? {
     val stored =
-      context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, null) ?: return null
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, null)
+            ?: return null
     return try {
       val bytes = Base64.decode(stored, Base64.NO_WRAP)
       val cipher = Cipher.getInstance("AES/GCM/NoPadding")

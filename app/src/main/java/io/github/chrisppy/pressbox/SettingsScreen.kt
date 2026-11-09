@@ -70,25 +70,25 @@ fun SettingsScreen(store: Store) {
   DisposableEffect(Unit) { onDispose { store.cancelPairing() } }
 
   Scaffold(
-    topBar = {
-      TopAppBar(
-        title = { Text("Settings") },
-        actions = {
-          TextButton(onClick = { store.showSettings = false }, enabled = store.isConfigured) {
-            Text("Done")
-          }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = palette.background),
-      )
-    },
-    containerColor = palette.background,
+      topBar = {
+        TopAppBar(
+            title = { Text("Settings") },
+            actions = {
+              TextButton(onClick = { store.showSettings = false }, enabled = store.isConfigured) {
+                Text("Done")
+              }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = palette.background),
+        )
+      },
+      containerColor = palette.background,
   ) { padding ->
     Column(
-      Modifier.padding(padding)
-        .fillMaxSize()
-        .imePadding()
-        .verticalScroll(rememberScrollState())
-        .padding(bottom = 24.dp)
+        Modifier.padding(padding)
+            .fillMaxSize()
+            .imePadding()
+            .verticalScroll(rememberScrollState())
+            .padding(bottom = 24.dp)
     ) {
       if (store.isConfigured) {
         Section("Server") {
@@ -102,12 +102,12 @@ fun SettingsScreen(store: Store) {
         ApproveSection(store)
         Toggles(store)
         Section(
-          footer =
-            "Removes the token and saved items. Revoke it on the server with `pressboxctl revoke`."
+            footer =
+                "Removes the token and saved items. Revoke it on the server with `pressboxctl revoke`."
         ) {
           OutlinedButton(
-            onClick = { confirmForget = true },
-            modifier = Modifier.padding(horizontal = 16.dp),
+              onClick = { confirmForget = true },
+              modifier = Modifier.padding(horizontal = 16.dp),
           ) {
             Text("Forget this device", color = palette.error)
           }
@@ -123,45 +123,45 @@ fun SettingsScreen(store: Store) {
 
   if (confirmForget) {
     AlertDialog(
-      onDismissRequest = { confirmForget = false },
-      title = { Text("Forget this device?") },
-      confirmButton = {
-        TextButton(
-          onClick = {
-            confirmForget = false
-            store.forget()
+        onDismissRequest = { confirmForget = false },
+        title = { Text("Forget this device?") },
+        confirmButton = {
+          TextButton(
+              onClick = {
+                confirmForget = false
+                store.forget()
+              }
+          ) {
+            Text("Forget", color = palette.error)
           }
-        ) {
-          Text("Forget", color = palette.error)
-        }
-      },
-      dismissButton = { TextButton(onClick = { confirmForget = false }) { Text("Cancel") } },
+        },
+        dismissButton = { TextButton(onClick = { confirmForget = false }) { Text("Cancel") } },
     )
   }
 }
 
 @Composable
 private fun Section(
-  title: String? = null,
-  footer: String? = null,
-  content: @Composable () -> Unit,
+    title: String? = null,
+    footer: String? = null,
+    content: @Composable () -> Unit,
 ) {
   Column(Modifier.fillMaxWidth().padding(top = 20.dp)) {
     if (title != null) {
       Text(
-        title,
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+          title,
+          style = MaterialTheme.typography.titleSmall,
+          color = MaterialTheme.colorScheme.primary,
+          modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
       )
     }
     content()
     if (footer != null) {
       Text(
-        footer,
-        style = MaterialTheme.typography.bodySmall,
-        color = Theme.palette.mutedText,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+          footer,
+          style = MaterialTheme.typography.bodySmall,
+          color = Theme.palette.mutedText,
+          modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
       )
     }
   }
@@ -170,8 +170,8 @@ private fun Section(
 @Composable
 private fun Labeled(label: String, value: String) {
   Row(
-    Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-    horizontalArrangement = Arrangement.SpaceBetween,
+      Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+      horizontalArrangement = Arrangement.SpaceBetween,
   ) {
     Text(label)
     Spacer(Modifier.width(16.dp))
@@ -182,10 +182,10 @@ private fun Labeled(label: String, value: String) {
 @Composable
 private fun ToggleRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
   Row(
-    Modifier.fillMaxWidth()
-      .clickable { onChange(!checked) }
-      .padding(horizontal = 16.dp, vertical = 8.dp),
-    verticalAlignment = Alignment.CenterVertically,
+      Modifier.fillMaxWidth()
+          .clickable { onChange(!checked) }
+          .padding(horizontal = 16.dp, vertical = 8.dp),
+      verticalAlignment = Alignment.CenterVertically,
   ) {
     Text(label, modifier = Modifier.weight(1f))
     Switch(checked = checked, onCheckedChange = onChange)
@@ -196,15 +196,15 @@ private fun ToggleRow(label: String, checked: Boolean, onChange: (Boolean) -> Un
 private fun Toggles(store: Store) {
   val context = LocalContext.current
   val askNotifications =
-    rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-      if (granted) store.updateNotifyUnread(true)
-      else store.errorMessage = "Allow notifications for pressbox in the system settings."
-    }
+      rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) store.updateNotifyUnread(true)
+        else store.errorMessage = "Allow notifications for pressbox in the system settings."
+      }
   Section(
-    footer =
-      "Scrolled past means off the top of the list while you scroll. The unread count is a " +
-        "silent notification, which your launcher shows as a badge; it is updated in the " +
-        "background from time to time, and Android decides how often."
+      footer =
+          "Scrolled past means off the top of the list while you scroll. The unread count is a " +
+              "silent notification, which your launcher shows as a badge; it is updated in the " +
+              "background from time to time, and Android decides how often."
   ) {
     ToggleRow("Require unlock", store.lockEnabled) { store.updateLockEnabled(it) }
     ToggleRow("Mark as read when scrolled past", store.markReadOnScroll) {
@@ -212,9 +212,9 @@ private fun Toggles(store: Store) {
     }
     ToggleRow("Unread count on app icon", store.notifyUnread) { enabled ->
       if (
-        enabled &&
-          !Unread.canNotify(context) &&
-          Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+          enabled &&
+              !Unread.canNotify(context) &&
+              Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
       ) {
         askNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
       } else {
@@ -231,37 +231,37 @@ private fun PairSection(store: Store) {
   var server by rememberSaveable { mutableStateOf(store.server) }
   var deviceName by rememberSaveable {
     mutableStateOf(
-      Settings.Global.getString(context.contentResolver, Settings.Global.DEVICE_NAME)
-        ?: Build.MODEL
+        Settings.Global.getString(context.contentResolver, Settings.Global.DEVICE_NAME)
+            ?: Build.MODEL
     )
   }
   var manualToken by rememberSaveable { mutableStateOf("") }
   var showToken by rememberSaveable { mutableStateOf(false) }
 
   Section(
-    "Connect to pressbox",
-    footer =
-      if (!ApiClient.isLocalHttp(server))
-        "This is plain http to an address that isn't on your network: the token and your " +
-          "feeds would travel unencrypted. Use https, for example with tailscale serve."
-      else "Plain http is fine on your local network or tailnet; use https otherwise.",
+      "Connect to pressbox",
+      footer =
+          if (!ApiClient.isLocalHttp(server))
+              "This is plain http to an address that isn't on your network: the token and your " +
+                  "feeds would travel unencrypted. Use https, for example with tailscale serve."
+          else "Plain http is fine on your local network or tailnet; use https otherwise.",
   ) {
     OutlinedTextField(
-      value = server,
-      onValueChange = { server = it },
-      label = { Text("Server") },
-      placeholder = { Text("https://rss.example.org") },
-      singleLine = true,
-      keyboardOptions =
-        KeyboardOptions(keyboardType = KeyboardType.Uri, autoCorrectEnabled = false),
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+        value = server,
+        onValueChange = { server = it },
+        label = { Text("Server") },
+        placeholder = { Text("https://rss.example.org") },
+        singleLine = true,
+        keyboardOptions =
+            KeyboardOptions(keyboardType = KeyboardType.Uri, autoCorrectEnabled = false),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
     )
     OutlinedTextField(
-      value = deviceName,
-      onValueChange = { deviceName = it },
-      label = { Text("Device name") },
-      singleLine = true,
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+        value = deviceName,
+        onValueChange = { deviceName = it },
+        label = { Text("Device name") },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
     )
   }
   Section {
@@ -270,23 +270,23 @@ private fun PairSection(store: Store) {
       if (code != null) {
         SelectionContainer {
           Text(
-            code,
-            fontSize = 40.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Monospace,
+              code,
+              fontSize = 40.sp,
+              fontWeight = FontWeight.Bold,
+              fontFamily = FontFamily.Monospace,
           )
         }
         Text(
-          "Approve it on the server with `pressboxctl approve $code`, or from another paired " +
-            "device.",
-          style = MaterialTheme.typography.bodyMedium,
+            "Approve it on the server with `pressboxctl approve $code`, or from another paired " +
+                "device.",
+            style = MaterialTheme.typography.bodyMedium,
         )
         Spacer(Modifier.size(8.dp))
         OutlinedButton(onClick = { store.cancelPairing() }) { Text("Cancel") }
       } else {
         Button(
-          onClick = { store.startPairing(server, deviceName) },
-          enabled = server.isNotBlank(),
+            onClick = { store.startPairing(server, deviceName) },
+            enabled = server.isNotBlank(),
         ) {
           Text("Pair this device")
         }
@@ -299,32 +299,32 @@ private fun PairSection(store: Store) {
   Section {
     HorizontalDivider(Modifier.padding(horizontal = 16.dp))
     Row(
-      Modifier.fillMaxWidth()
-        .clickable { showToken = !showToken }
-        .padding(horizontal = 16.dp, vertical = 12.dp),
-      verticalAlignment = Alignment.CenterVertically,
+        Modifier.fillMaxWidth()
+            .clickable { showToken = !showToken }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
       Text("Use a token instead", modifier = Modifier.weight(1f))
       Icon(
-        if (showToken) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
-        contentDescription = null,
+          if (showToken) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+          contentDescription = null,
       )
     }
     if (showToken) {
       OutlinedTextField(
-        value = manualToken,
-        onValueChange = { manualToken = it },
-        label = { Text("Token from pressboxctl add-device") },
-        singleLine = true,
-        visualTransformation = PasswordVisualTransformation(),
-        keyboardOptions =
-          KeyboardOptions(keyboardType = KeyboardType.Password, autoCorrectEnabled = false),
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+          value = manualToken,
+          onValueChange = { manualToken = it },
+          label = { Text("Token from pressboxctl add-device") },
+          singleLine = true,
+          visualTransformation = PasswordVisualTransformation(),
+          keyboardOptions =
+              KeyboardOptions(keyboardType = KeyboardType.Password, autoCorrectEnabled = false),
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
       )
       FilledTonalButton(
-        onClick = { store.useToken(server, manualToken) },
-        enabled = manualToken.isNotBlank() && server.isNotBlank(),
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+          onClick = { store.useToken(server, manualToken) },
+          enabled = manualToken.isNotBlank() && server.isNotBlank(),
+          modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
       ) {
         Text("Use token")
       }
@@ -339,59 +339,59 @@ private fun ApproveSection(store: Store) {
   var user by rememberSaveable { mutableStateOf("") }
   var status by rememberSaveable { mutableStateOf<String?>(null) }
   Section(
-    "Approve a device",
-    footer =
-      "Enter the code another device shows while pairing. It's added to your account unless " +
-        "you name another user.",
+      "Approve a device",
+      footer =
+          "Enter the code another device shows while pairing. It's added to your account unless " +
+              "you name another user.",
   ) {
     Row(
-      Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
-      verticalAlignment = Alignment.CenterVertically,
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
       OutlinedTextField(
-        value = code,
-        onValueChange = { code = it },
-        label = { Text("Code, e.g. K7W-4QX") },
-        singleLine = true,
-        textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
-        keyboardOptions =
-          KeyboardOptions(
-            capitalization = KeyboardCapitalization.Characters,
-            autoCorrectEnabled = false,
-          ),
-        modifier = Modifier.weight(1f),
+          value = code,
+          onValueChange = { code = it },
+          label = { Text("Code, e.g. K7W-4QX") },
+          singleLine = true,
+          textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
+          keyboardOptions =
+              KeyboardOptions(
+                  capitalization = KeyboardCapitalization.Characters,
+                  autoCorrectEnabled = false,
+              ),
+          modifier = Modifier.weight(1f),
       )
       Spacer(Modifier.width(8.dp))
       FilledTonalButton(
-        onClick = {
-          scope.launch {
-            store.approve(code, user)?.let {
-              status = "Paired $it."
-              code = ""
-              user = ""
+          onClick = {
+            scope.launch {
+              store.approve(code, user)?.let {
+                status = "Paired $it."
+                code = ""
+                user = ""
+              }
             }
-          }
-        },
-        enabled = code.trim().length >= 6,
+          },
+          enabled = code.trim().length >= 6,
       ) {
         Text("Approve")
       }
     }
     if (store.me?.admin == true) {
       OutlinedTextField(
-        value = user,
-        onValueChange = { user = it },
-        label = { Text("For user (blank: you)") },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(autoCorrectEnabled = false),
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+          value = user,
+          onValueChange = { user = it },
+          label = { Text("For user (blank: you)") },
+          singleLine = true,
+          keyboardOptions = KeyboardOptions(autoCorrectEnabled = false),
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
       )
     }
     status?.let {
       Text(
-        it,
-        color = Theme.palette.mutedText,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+          it,
+          color = Theme.palette.mutedText,
+          modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
       )
     }
   }

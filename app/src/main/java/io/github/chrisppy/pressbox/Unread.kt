@@ -35,17 +35,17 @@ object Unread {
   private const val WORK = "unread-refresh"
 
   fun canNotify(context: Context): Boolean =
-    ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
-      PackageManager.PERMISSION_GRANTED
+      ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+          PackageManager.PERMISSION_GRANTED
 
   private fun ensureChannel(context: Context) {
     val channel =
-      NotificationChannel(CHANNEL, "Unread count", NotificationManager.IMPORTANCE_LOW).apply {
-        description = "How many items are unread, shown as a badge on the app icon."
-        setShowBadge(true)
-        enableVibration(false)
-        setSound(null, null)
-      }
+        NotificationChannel(CHANNEL, "Unread count", NotificationManager.IMPORTANCE_LOW).apply {
+          description = "How many items are unread, shown as a badge on the app icon."
+          setShowBadge(true)
+          enableVibration(false)
+          setSound(null, null)
+        }
     context.getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
   }
 
@@ -60,25 +60,25 @@ object Unread {
     }
     ensureChannel(context)
     val open =
-      PendingIntent.getActivity(
-        context,
-        0,
-        Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-      )
+        PendingIntent.getActivity(
+            context,
+            0,
+            Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
     val notification =
-      NotificationCompat.Builder(context, CHANNEL)
-        .setSmallIcon(R.drawable.ic_notification)
-        .setContentTitle(if (count == 1) "1 unread item" else "$count unread items")
-        .setNumber(count)
-        .setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL)
-        .setPriority(NotificationCompat.PRIORITY_LOW)
-        .setCategory(NotificationCompat.CATEGORY_STATUS)
-        .setOnlyAlertOnce(true)
-        .setSilent(true)
-        .setShowWhen(false)
-        .setContentIntent(open)
-        .build()
+        NotificationCompat.Builder(context, CHANNEL)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(if (count == 1) "1 unread item" else "$count unread items")
+            .setNumber(count)
+            .setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)
+            .setOnlyAlertOnce(true)
+            .setSilent(true)
+            .setShowWhen(false)
+            .setContentIntent(open)
+            .build()
     try {
       manager.notify(NOTIFICATION, notification)
     } catch (_: SecurityException) {
@@ -94,34 +94,35 @@ object Unread {
   fun schedule(context: Context) {
     val work = WorkManager.getInstance(context)
     val enabled =
-      context.getSharedPreferences("settings", Context.MODE_PRIVATE).getBoolean(PREF, false)
+        context.getSharedPreferences("settings", Context.MODE_PRIVATE).getBoolean(PREF, false)
     if (!enabled) {
       work.cancelUniqueWork(WORK)
       cancel(context)
       return
     }
     val request =
-      PeriodicWorkRequestBuilder<UnreadWorker>(30, TimeUnit.MINUTES)
-        .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
-        .build()
+        PeriodicWorkRequestBuilder<UnreadWorker>(30, TimeUnit.MINUTES)
+            .setConstraints(
+                Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
+            )
+            .build()
     work.enqueueUniquePeriodicWork(WORK, ExistingPeriodicWorkPolicy.KEEP, request)
   }
 }
 
 /** The background refresh: fetch unread counts and update the notification. */
-class UnreadWorker(context: Context, params: WorkerParameters) :
-  CoroutineWorker(context, params) {
+class UnreadWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
   override suspend fun doWork(): Result {
     val prefs = applicationContext.getSharedPreferences("settings", Context.MODE_PRIVATE)
     if (!prefs.getBoolean(Unread.PREF, false)) return Result.success()
     val server = prefs.getString("server", null) ?: return Result.success()
     val token = TokenStore.token(applicationContext) ?: return Result.success()
     val feeds =
-      try {
-        ApiClient(server, token).feeds()
-      } catch (e: Exception) {
-        return if (e.isOffline()) Result.retry() else Result.success()
-      }
+        try {
+          ApiClient(server, token).feeds()
+        } catch (e: Exception) {
+          return if (e.isOffline()) Result.retry() else Result.success()
+        }
     Unread.show(applicationContext, feeds.filter { !it.isArchived }.sumOf { it.unread })
     return Result.success()
   }

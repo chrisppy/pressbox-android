@@ -23,7 +23,7 @@ sealed class ApiException(message: String) : Exception(message) {
   class InvalidServer : ApiException("The server address isn't a valid URL.")
 
   class Unauthorized :
-    ApiException("The server rejected this device's token. Pair it again in Settings.")
+      ApiException("The server rejected this device's token. Pair it again in Settings.")
 
   class Forbidden : ApiException("Only admins can approve devices for other users.")
 
@@ -41,11 +41,11 @@ class ApiClient(private val server: String, private val token: String?) {
     }
 
     private val http: OkHttpClient =
-      OkHttpClient.Builder()
-        .connectTimeout(20, TimeUnit.SECONDS)
-        .readTimeout(20, TimeUnit.SECONDS)
-        .callTimeout(30, TimeUnit.SECONDS)
-        .build()
+        OkHttpClient.Builder()
+            .connectTimeout(20, TimeUnit.SECONDS)
+            .readTimeout(20, TimeUnit.SECONDS)
+            .callTimeout(30, TimeUnit.SECONDS)
+            .build()
 
     private val jsonType = "application/json".toMediaType()
 
@@ -59,10 +59,10 @@ class ApiClient(private val server: String, private val token: String?) {
       if (octets.size != 4) return false
       val (a, b) = octets[0] to octets[1]
       return a == 10 ||
-        a == 127 ||
-        (a == 172 && b in 16..31) ||
-        (a == 192 && b == 168) ||
-        (a == 100 && b in 64..127)
+          a == 127 ||
+          (a == 172 && b in 16..31) ||
+          (a == 192 && b == 168) ||
+          (a == 100 && b in 64..127)
     }
   }
 
@@ -78,23 +78,23 @@ class ApiClient(private val server: String, private val token: String?) {
 
   /** Sends a request and returns the body and HTTP status. */
   private suspend fun raw(
-    method: String,
-    path: String,
-    query: List<Pair<String, String>> = emptyList(),
-    body: String? = null,
+      method: String,
+      path: String,
+      query: List<Pair<String, String>> = emptyList(),
+      body: String? = null,
   ): Pair<String, Int> {
     val requestBody: RequestBody? =
-      when {
-        body != null -> body.toRequestBody(jsonType)
-        method == "POST" || method == "PUT" -> ByteArray(0).toRequestBody(null)
-        else -> null
-      }
+        when {
+          body != null -> body.toRequestBody(jsonType)
+          method == "POST" || method == "PUT" -> ByteArray(0).toRequestBody(null)
+          else -> null
+        }
     val request =
-      Request.Builder()
-        .url(url(path, query))
-        .method(method, requestBody)
-        .apply { if (!token.isNullOrEmpty()) header("Authorization", "Bearer $token") }
-        .build()
+        Request.Builder()
+            .url(url(path, query))
+            .method(method, requestBody)
+            .apply { if (!token.isNullOrEmpty()) header("Authorization", "Bearer $token") }
+            .build()
     return withContext(Dispatchers.IO) {
       http.newCall(request).execute().use { response ->
         response.body.string() to response.code
@@ -103,10 +103,10 @@ class ApiClient(private val server: String, private val token: String?) {
   }
 
   private suspend fun send(
-    method: String,
-    path: String,
-    query: List<Pair<String, String>> = emptyList(),
-    body: String? = null,
+      method: String,
+      path: String,
+      query: List<Pair<String, String>> = emptyList(),
+      body: String? = null,
   ): String {
     val (data, status) = raw(method, path, query, body)
     return when (status) {
@@ -118,18 +118,20 @@ class ApiClient(private val server: String, private val token: String?) {
     }
   }
 
-  private inline fun <reified T> decode(data: String): T = json.decodeFromString(serializer<T>(), data)
+  private inline fun <reified T> decode(data: String): T =
+      json.decodeFromString(serializer<T>(), data)
 
-  private inline fun <reified T> encode(value: T): String = json.encodeToString(serializer<T>(), value)
+  private inline fun <reified T> encode(value: T): String =
+      json.encodeToString(serializer<T>(), value)
 
   suspend fun feeds(): List<Feed> = decode(send("GET", "/api/v1/feeds"))
 
   suspend fun items(
-    source: Source,
-    unreadOnly: Boolean,
-    search: String? = null,
-    after: NextPage? = null,
-    limit: Int = 100,
+      source: Source,
+      unreadOnly: Boolean,
+      search: String? = null,
+      after: NextPage? = null,
+      limit: Int = 100,
   ): ItemPage {
     val query = mutableListOf("limit" to limit.toString())
     when (source) {
@@ -162,7 +164,7 @@ class ApiClient(private val server: String, private val token: String?) {
   }
 
   suspend fun markFeedRead(feed: String): Int =
-    decode<Updated>(send("POST", "/api/v1/feeds/${pathSegment(feed)}/read-all")).updated
+      decode<Updated>(send("POST", "/api/v1/feeds/${pathSegment(feed)}/read-all")).updated
 
   suspend fun refresh() {
     send("POST", "/api/v1/refresh")
@@ -172,7 +174,7 @@ class ApiClient(private val server: String, private val token: String?) {
 
   /** Asks the server to pair this device; show the returned code to the user. */
   suspend fun pairStart(name: String): PairStart =
-    decode(send("POST", "/api/v1/pair", body = encode(PairRequest(name))))
+      decode(send("POST", "/api/v1/pair", body = encode(PairRequest(name))))
 
   /**
    * The token once approved, `null` while still waiting. Throws [ApiException.NotFound] if the
@@ -197,28 +199,28 @@ class ApiClient(private val server: String, private val token: String?) {
     val cleanCode = code.trim().uppercase()
     val cleanUser = user?.trim()?.ifEmpty { null }
     return decode(
-      send(
-        "POST",
-        "/api/v1/pairings/${pathSegment(cleanCode)}/approve",
-        body = encode(ApproveRequest(cleanUser)),
-      )
+        send(
+            "POST",
+            "/api/v1/pairings/${pathSegment(cleanCode)}/approve",
+            body = encode(ApproveRequest(cleanUser)),
+        )
     )
   }
 
   private fun pathSegment(value: String): String =
-    HttpUrl.Builder()
-      .scheme("http")
-      .host("x")
-      .addPathSegment(value)
-      .build()
-      .encodedPathSegments
-      .first()
+      HttpUrl.Builder()
+          .scheme("http")
+          .host("x")
+          .addPathSegment(value)
+          .build()
+          .encodedPathSegments
+          .first()
 }
 
 /** Errors that mean "no connection": show cached data instead of an error. */
 fun Throwable.isOffline(): Boolean =
-  this is java.net.UnknownHostException ||
-    this is java.net.ConnectException ||
-    this is java.net.SocketTimeoutException ||
-    this is java.net.NoRouteToHostException ||
-    (this is IOException && message?.contains("timeout", ignoreCase = true) == true)
+    this is java.net.UnknownHostException ||
+        this is java.net.ConnectException ||
+        this is java.net.SocketTimeoutException ||
+        this is java.net.NoRouteToHostException ||
+        (this is IOException && message?.contains("timeout", ignoreCase = true) == true)

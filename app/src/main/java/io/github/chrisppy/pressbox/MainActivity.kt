@@ -55,17 +55,17 @@ class MainActivity : FragmentActivity() {
     enableEdgeToEdge()
     super.onCreate(savedInstanceState)
     lifecycle.addObserver(
-      object : DefaultLifecycleObserver {
-        override fun onStart(owner: LifecycleOwner) {
-          if (store.isLocked && !authenticating) unlock()
-          if (store.isConfigured) store.reloadAsync()
-        }
+        object : DefaultLifecycleObserver {
+          override fun onStart(owner: LifecycleOwner) {
+            if (store.isLocked && !authenticating) unlock()
+            if (store.isConfigured) store.reloadAsync()
+          }
 
-        override fun onStop(owner: LifecycleOwner) {
-          if (!authenticating) store.lockIfEnabled()
-          Unread.schedule(applicationContext)
+          override fun onStop(owner: LifecycleOwner) {
+            if (!authenticating) store.lockIfEnabled()
+            Unread.schedule(applicationContext)
+          }
         }
-      }
     )
     setContent {
       PressboxTheme {
@@ -91,26 +91,26 @@ class MainActivity : FragmentActivity() {
     }
     authenticating = true
     val prompt =
-      BiometricPrompt(
-        this,
-        ContextCompat.getMainExecutor(this),
-        object : BiometricPrompt.AuthenticationCallback() {
-          override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-            authenticating = false
-            store.unlocked()
-          }
+        BiometricPrompt(
+            this,
+            ContextCompat.getMainExecutor(this),
+            object : BiometricPrompt.AuthenticationCallback() {
+              override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                authenticating = false
+                store.unlocked()
+              }
 
-          override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-            // Cancelled or failed for good: the lock screen's Unlock button tries again.
-            authenticating = false
-          }
-        },
-      )
+              override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                // Cancelled or failed for good: the lock screen's Unlock button tries again.
+                authenticating = false
+              }
+            },
+        )
     prompt.authenticate(
-      BiometricPrompt.PromptInfo.Builder()
-        .setTitle("Unlock your feeds")
-        .setAllowedAuthenticators(authenticators)
-        .build()
+        BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Unlock your feeds")
+            .setAllowedAuthenticators(authenticators)
+            .build()
     )
   }
 }
@@ -149,7 +149,7 @@ private fun Stacked(store: Store) {
     item != null -> {
       BackHandler { store.selectedItem = null }
       CompositionLocalProvider(
-        LocalNavigation provides Navigation(back = { store.selectedItem = null }, home = home)
+          LocalNavigation provides Navigation(back = { store.selectedItem = null }, home = home)
       ) {
         ArticleScreen(store, item)
       }
@@ -174,7 +174,7 @@ private fun TwoPanes(store: Store) {
       } else {
         BackHandler { store.select(null) }
         CompositionLocalProvider(
-          LocalNavigation provides Navigation(back = { store.select(null) })
+            LocalNavigation provides Navigation(back = { store.select(null) })
         ) {
           ItemListScreen(store)
         }
@@ -216,9 +216,9 @@ private fun ArticlePane(store: Store) {
 private fun LockScreen(onUnlock: () -> Unit) {
   BackHandler {}
   Column(
-    Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainer),
-    verticalArrangement = Arrangement.Center,
-    horizontalAlignment = Alignment.CenterHorizontally,
+      Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainer),
+      verticalArrangement = Arrangement.Center,
+      horizontalAlignment = Alignment.CenterHorizontally,
   ) {
     Icon(Icons.Filled.Lock, contentDescription = null, modifier = Modifier.size(40.dp))
     Spacer(Modifier.size(16.dp))
