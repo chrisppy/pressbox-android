@@ -1,6 +1,6 @@
 <!--
 SPDX-FileCopyrightText: 2026 Chris Palmer <chris@red-oxide.org>
-SPDX-License-Identifier: MPL-2.0
+SPDX-License-Identifier: GPL-3.0-only
 -->
 
 # Changelog
@@ -26,5 +26,6 @@ The first version, matching pressbox-ios.
 - An unlock requirement (fingerprint, face or screen lock), an unread count
   badge through a silent notification refreshed in the background, and mark as
   read on scroll (off by default).
+- Licensed under GPL-3.0-only, like pressbox (the icon stays CC-BY-SA-4.0).
 - Birdland colors: Birdland in dark mode, Birdland Light in light mode, and the
   pressbox icon as an adaptive icon with a themed (monochrome) layer.

@@ -1,6 +1,6 @@
 <!--
 SPDX-FileCopyrightText: 2026 Chris Palmer <chris@red-oxide.org>
-SPDX-License-Identifier: MPL-2.0
+SPDX-License-Identifier: GPL-3.0-only
 -->
 
 # pressbox-android
@@ -120,7 +120,8 @@ its license in an SPDX header or in `REUSE.toml` (`reuse lint` checks this, also
 in `nix flake check`).
 
 - The app, build files and docs are licensed under the
-  [Mozilla Public License 2.0](LICENSES/MPL-2.0.txt).
+  [GNU General Public License v3.0 only](LICENSES/GPL-3.0-only.txt), like
+  pressbox itself.
 - The app icon (`assets/app-icon.svg` and the adaptive icon layers drawn from
   it) is licensed under
   [Creative Commons Attribution-ShareAlike 4.0](LICENSES/CC-BY-SA-4.0.txt).

@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2026 Chris Palmer <chris@red-oxide.org>
-# SPDX-License-Identifier: MPL-2.0
+# SPDX-License-Identifier: GPL-3.0-only
 
 {
   description = "pressbox-android: the Android app for the pressbox feed reader";

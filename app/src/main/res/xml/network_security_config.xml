@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 SPDX-FileCopyrightText: 2026 Chris Palmer <chris@red-oxide.org>
-SPDX-License-Identifier: MPL-2.0
+SPDX-License-Identifier: GPL-3.0-only
 -->
 <!-- Plain http is allowed so a server on the local network or a tailnet
      works without certificates, as on iOS. Android can't limit it to local
