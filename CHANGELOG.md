@@ -22,7 +22,7 @@ through API v1 (`/api/v1`).
   the pitch and a transcript that follows along. The service saves the position
   every 15 seconds and on pause. Opening an episode no longer marks it read.
 
-The first version, matching pressbox-ios.
+The first version, matching pressbox-darwin (then pressbox-ios).
 
 - Feeds, tags, item lists and an article reader for a pressbox server (Kotlin
   and Jetpack Compose, Android 12+), with search, cursor paging and offline

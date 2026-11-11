@@ -9,7 +9,7 @@ The Android app for [pressbox](https://github.com/chrisppy/pressbox), a
 self-hosted feed reader whose feeds and users are declared in NixOS. It reads
 from your pressbox server over its HTTP API (`/api/v1`) and shares read and
 starred state with the other clients, such as the `pressbox` terminal reader and
-[pressbox-ios](https://github.com/chrisppy/pressbox-ios).
+[pressbox-darwin](https://github.com/chrisppy/pressbox-darwin).
 
 > [!NOTE]
 > pressbox-android is in its early days. Expect rough edges, and features and
