@@ -6,11 +6,13 @@ SPDX-License-Identifier: GPL-3.0-only
 # Changelog
 
 All notable changes to pressbox-android. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
-[Semantic Versioning](https://semver.org/). The app is versioned on its own; it
-talks to pressbox servers through API v1 (`/api/v1`).
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions are
+[calendar versions](https://calver.org/), `YYYY.M.PATCH`: the year and month of
+the release, then a count that starts at 0 each month (2026.11.0, 2026.11.1,
+2026.12.0). The app is versioned on its own; it talks to pressbox servers
+through API v1 (`/api/v1`).
 
-## [Unreleased]
+## [2026.11.0] - Unreleased
 
 - Podcasts (needs a pressbox server with podcast support): episodes play in a
   Media3 media session service (background playback, notification, lock screen,
@@ -37,3 +39,5 @@ The first version, matching pressbox-ios.
 - Licensed under GPL-3.0-only, like pressbox (the icon stays CC-BY-SA-4.0).
 - Birdland colors: Birdland in dark mode, Birdland Light in light mode, and the
   pressbox icon as an adaptive icon with a themed (monochrome) layer.
+
+[2026.11.0]: https://github.com/chrisppy/pressbox-android/releases/tag/v2026.11.0

@@ -18,8 +18,10 @@ android {
     applicationId = "io.github.chrisppy.pressbox"
     minSdk = 31
     targetSdk = 36
-    versionCode = 1
-    versionName = "0.1.0"
+    // Calendar versions, YYYY.M.PATCH (see CHANGELOG.md); the code is the same
+    // as digits, YYYYMMPP, so it always increases.
+    versionCode = 20261100
+    versionName = "2026.11.0"
   }
 
   buildTypes {

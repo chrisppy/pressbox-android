@@ -129,9 +129,10 @@ just verify    # check formatting, then nix flake check (formatting, reuse lint)
 | `BottomControls.kt` | The bottom bar and status banners |
 | `Theme.kt` | Birdland colors |
 
-Changes are recorded in [CHANGELOG.md](CHANGELOG.md). A release bumps
-`versionName` (and `versionCode`) in `app/build.gradle.kts` and is tagged
-`vX.Y.Z`.
+Changes are recorded in [CHANGELOG.md](CHANGELOG.md). Versions are calendar
+versions, `YYYY.M.PATCH` (2026.11.0, then 2026.11.1, 2026.12.0). A release sets
+`versionName` in `app/build.gradle.kts` to it and `versionCode` to the same as
+digits, `YYYYMMPP` (20261100), and is tagged `vYYYY.M.PATCH`.
 
 ## License
 
