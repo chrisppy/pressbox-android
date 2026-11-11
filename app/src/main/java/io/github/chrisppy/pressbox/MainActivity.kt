@@ -20,8 +20,12 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -122,16 +126,30 @@ class MainActivity : FragmentActivity() {
 @Composable
 fun App(store: Store, onUnlock: () -> Unit) {
   Box(Modifier.fillMaxSize().background(Theme.palette.background)) {
-    if (store.showSettings) {
-      SettingsScreen(store)
-    } else {
-      BoxWithConstraints(Modifier.fillMaxSize()) {
-        when {
-          maxWidth >= 1000.dp -> ThreePanes(store)
-          maxWidth >= 600.dp -> TwoPanes(store)
-          else -> Stacked(store)
+    Column(Modifier.fillMaxSize()) {
+      val playing = store.nowPlaying != null && !store.showSettings
+      // While an episode plays, its bar takes the bottom edge, so the screens' own bottom bars
+      // leave the navigation bar's inset to it.
+      Box(
+          Modifier.weight(1f)
+              .then(
+                  if (playing) Modifier.consumeWindowInsets(WindowInsets.navigationBars)
+                  else Modifier
+              )
+      ) {
+        if (store.showSettings) {
+          SettingsScreen(store)
+        } else {
+          BoxWithConstraints(Modifier.fillMaxSize()) {
+            when {
+              maxWidth >= 1000.dp -> ThreePanes(store)
+              maxWidth >= 600.dp -> TwoPanes(store)
+              else -> Stacked(store)
+            }
+          }
         }
       }
+      if (playing) MiniPlayer(store, Modifier.navigationBarsPadding())
     }
     if (store.isLocked) LockScreen(onUnlock)
   }

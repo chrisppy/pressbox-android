@@ -22,6 +22,10 @@ data class Feed(
     @SerialName("last_error") val lastError: String? = null,
     /** Removed from the server config but kept for its starred items. */
     val archived: Boolean? = null,
+    /** The feed's artwork. */
+    val image: String? = null,
+    /** `podcast:medium`: `podcast`, `music`, `video`, ... */
+    val medium: String? = null,
 ) {
   val isArchived: Boolean
     get() = archived ?: false
@@ -39,6 +43,85 @@ data class Item(
     val published: Long,
     val read: Boolean,
     val starred: Boolean,
+    /** Audio or video (a podcast episode), if any. */
+    val media: Media? = null,
+    /** Where this user stopped playing it, in seconds; 0 if not started. */
+    val position: Int = 0,
+) {
+  val isEpisode: Boolean
+    get() = media != null
+}
+
+/** An item's audio and video, from its enclosures and the Podcasting 2.0 tags. */
+@Serializable
+data class Media(
+    /** The feed's own enclosure first, then `podcast:alternateEnclosure`s. */
+    val enclosures: List<Enclosure>,
+    /** Seconds. */
+    val duration: Int? = null,
+    val image: String? = null,
+    val season: Int? = null,
+    val episode: Int? = null,
+    /** The chapters file; read it through [ApiClient.chapters]. */
+    val chapters: String? = null,
+    val transcripts: List<TranscriptFile> = emptyList(),
+) {
+  val video: Enclosure?
+    get() = enclosures.firstOrNull { it.isVideo }
+
+  /** The first that isn't video, else the video. */
+  val audio: Enclosure?
+    get() = enclosures.firstOrNull { !it.isVideo } ?: video
+}
+
+@Serializable
+data class Enclosure(
+    val url: String,
+    val mime: String? = null,
+    val length: Long? = null,
+    val bitrate: Int? = null,
+    val height: Int? = null,
+    val title: String? = null,
+) {
+  val isVideo: Boolean
+    get() = mime?.startsWith("video/") == true
+}
+
+@Serializable
+data class TranscriptFile(
+    val url: String,
+    val mime: String,
+    val lang: String? = null,
+    val rel: String? = null,
+)
+
+/** Body of `PUT /api/v1/items/{id}/position`. */
+@Serializable data class Position(val position: Int)
+
+/** `GET /api/v1/items/{id}/chapters`. */
+@Serializable data class Chapters(val chapters: List<Chapter>)
+
+@Serializable
+data class Chapter(
+    /** Seconds from the start. */
+    val start: Double,
+    val end: Double? = null,
+    val title: String? = null,
+    val image: String? = null,
+    val url: String? = null,
+    /** Only changes the artwork; left out of chapter lists. */
+    val hidden: Boolean = false,
+)
+
+/** `GET /api/v1/items/{id}/transcript`. */
+@Serializable data class Transcript(val segments: List<Segment>)
+
+@Serializable
+data class Segment(
+    val start: Double,
+    val end: Double,
+    val speaker: String? = null,
+    val text: String,
 )
 
 @Serializable

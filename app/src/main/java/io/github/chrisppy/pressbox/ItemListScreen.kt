@@ -23,7 +23,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.Contrast
+import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
@@ -299,6 +302,7 @@ private fun SwipeableRow(store: Store, item: Item) {
         item = item,
         feedTitle = store.feedTitle(item.feedId),
         selected = store.selectedItem == item.id,
+        playing = store.isCurrent(item),
         modifier =
             Modifier.clickable { store.selectedItem = item.id }
                 .semantics {
@@ -319,7 +323,13 @@ private fun SwipeableRow(store: Store, item: Item) {
 }
 
 @Composable
-fun ItemRow(item: Item, feedTitle: String, selected: Boolean, modifier: Modifier = Modifier) {
+fun ItemRow(
+    item: Item,
+    feedTitle: String,
+    selected: Boolean,
+    modifier: Modifier = Modifier,
+    playing: Boolean = false,
+) {
   val palette = Theme.palette
   Column(
       modifier =
@@ -345,6 +355,24 @@ fun ItemRow(item: Item, feedTitle: String, selected: Boolean, modifier: Modifier
           overflow = TextOverflow.Ellipsis,
           modifier = Modifier.weight(1f),
       )
+      if (item.isEpisode) {
+        Icon(
+            when {
+              playing -> Icons.AutoMirrored.Filled.VolumeUp
+              item.position > 0 -> Icons.Filled.Contrast
+              else -> Icons.Filled.GraphicEq
+            },
+            contentDescription =
+                when {
+                  playing -> "Playing"
+                  item.position > 0 -> "Started"
+                  else -> "Episode"
+                },
+            tint = palette.accent,
+            modifier = Modifier.size(14.dp),
+        )
+        Spacer(Modifier.width(6.dp))
+      }
       if (item.starred) {
         Icon(
             Icons.Filled.Star,

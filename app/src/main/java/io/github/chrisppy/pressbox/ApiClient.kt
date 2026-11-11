@@ -163,6 +163,27 @@ class ApiClient(private val server: String, private val token: String?) {
     send("PUT", "/api/v1/items/$id/starred", body = encode(Flag(value)))
   }
 
+  /** Saves where playback of an item's media stopped, in seconds. */
+  suspend fun setPosition(id: Long, position: Int) {
+    send("PUT", "/api/v1/items/$id/position", body = encode(Position(position)))
+  }
+
+  /** An item's chapters; none if it has no chapters file. */
+  suspend fun chapters(id: Long): List<Chapter> =
+      try {
+        decode<Chapters>(send("GET", "/api/v1/items/$id/chapters")).chapters
+      } catch (_: ApiException.NotFound) {
+        emptyList()
+      }
+
+  /** An item's transcript; `null` if it has none. */
+  suspend fun transcript(id: Long): Transcript? =
+      try {
+        decode<Transcript>(send("GET", "/api/v1/items/$id/transcript"))
+      } catch (_: ApiException.NotFound) {
+        null
+      }
+
   suspend fun markFeedRead(feed: String): Int =
       decode<Updated>(send("POST", "/api/v1/feeds/${pathSegment(feed)}/read-all")).updated
 

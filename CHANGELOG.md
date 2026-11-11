@@ -12,6 +12,15 @@ talks to pressbox servers through API v1 (`/api/v1`).
 
 ## [Unreleased]
 
+- Podcasts (needs a pressbox server with podcast support): episodes play in a
+  Media3 media session service (background playback, notification, lock screen,
+  headphone and Bluetooth controls), resume where any client left
+  off, and are marked read when played to the end. A bar along the bottom opens
+  the full player with video, scrubbing, 10/30-second skips, chapters, speeds
+  that keep the pitch and a transcript that follows along. The service saves
+  the position every 15 seconds and on pause. Opening an episode no longer marks
+  it read.
+
 The first version, matching pressbox-ios.
 
 - Feeds, tags, item lists and an article reader for a pressbox server (Kotlin

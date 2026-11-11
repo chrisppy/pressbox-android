@@ -96,7 +96,10 @@ fun ArticleScreen(store: Store, itemId: Long) {
                     DateUtils.FORMAT_ABBREV_MONTH,
             )
         val html = page(article, store.feedTitle(article.feedId), date, palette)
-        ArticleWebView(html, baseUrl = article.url)
+        Column(Modifier.fillMaxSize()) {
+          if (article.isEpisode) EpisodeHeader(store, current ?: article)
+          Box(Modifier.weight(1f)) { ArticleWebView(html, baseUrl = article.url) }
+        }
       }
     }
   }

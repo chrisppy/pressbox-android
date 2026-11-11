@@ -4,13 +4,22 @@
 package io.github.chrisppy.pressbox
 
 import android.app.Application
+import android.content.ComponentName
 import android.content.Context
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.content.edit
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.C
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -97,6 +106,40 @@ class Store(app: Application) : AndroidViewModel(app) {
   var markReadOnScroll by mutableStateOf(prefs.getBoolean("markReadOnScroll", false))
     private set
 
+  // Podcasts: the episode playing in [PlaybackService], as its media controller reports it.
+
+  /** The episode playing or paused; `null` when stopped. */
+  var nowPlaying by mutableStateOf<Item?>(null)
+    private set
+
+  var playingVideo by mutableStateOf(false)
+    private set
+
+  var isPlaying by mutableStateOf(false)
+    private set
+
+  /** Seconds into the episode. */
+  var position by mutableStateOf(0.0)
+    private set
+
+  /** Seconds, once known. */
+  var duration by mutableStateOf<Double?>(null)
+    private set
+
+  var speed by mutableStateOf(1f)
+    private set
+
+  /** The playing episode's chapters. */
+  var chapters by mutableStateOf(listOf<Chapter>())
+    private set
+
+  /** The full player is showing. */
+  var showPlayer by mutableStateOf(false)
+
+  /** Talks to [PlaybackService]; also the player the video view draws. */
+  var controller by mutableStateOf<MediaController?>(null)
+    private set
+
   init {
     isLocked = lockEnabled
     Cache.load(app)?.let {
@@ -105,6 +148,7 @@ class Store(app: Application) : AndroidViewModel(app) {
       articles = it.articles
     }
     if (!isConfigured) showSettings = true
+    connectPlayer()
   }
 
   val isConfigured: Boolean
@@ -229,12 +273,19 @@ class Store(app: Application) : AndroidViewModel(app) {
     }
   }
 
-  /** The full item with content, from the server or the offline cache, and marks it read. */
+  /**
+   * The full item with content, from the server or the offline cache, and marks it read, unless it
+   * is a podcast episode: those are read once played to the end.
+   */
   suspend fun open(item: Item): Item {
     var full = articles[item.id] ?: item
     run {
       full = api.item(item.id)
       articles = articles + (item.id to full)
+    }
+    if (full.isEpisode) {
+      saveCache()
+      return full
     }
     setRead(full, true)
     saveCache()
@@ -366,6 +417,8 @@ class Store(app: Application) : AndroidViewModel(app) {
   }
 
   fun forget() {
+    controller?.stop()
+    controller?.clearMediaItems()
     setToken("")
     me = null
     serverVersion = null
@@ -420,5 +473,232 @@ class Store(app: Application) : AndroidViewModel(app) {
 
   fun unlocked() {
     isLocked = false
+  }
+
+  // Podcasts
+
+  /** Connects to [PlaybackService], which may already be playing, and follows it. */
+  private fun connectPlayer() {
+    val token = SessionToken(context, ComponentName(context, PlaybackService::class.java))
+    val future = MediaController.Builder(context, token).buildAsync()
+    future.addListener(
+        {
+          val connected = runCatching { future.get() }.getOrNull() ?: return@addListener
+          controller = connected
+          connected.addListener(
+              object : Player.Listener {
+                override fun onEvents(player: Player, events: Player.Events) = follow()
+
+                override fun onPlaybackStateChanged(state: Int) {
+                  if (state == Player.STATE_ENDED) ended()
+                }
+              }
+          )
+          follow()
+          // The position moves without events; follow it about once a second.
+          viewModelScope.launch {
+            while (true) {
+              delay(1000)
+              if (nowPlaying != null) follow()
+            }
+          }
+        },
+        ContextCompat.getMainExecutor(context),
+    )
+  }
+
+  /** The local copy of the position, kept close enough for the list's marks. */
+  private var localPosition = 0
+
+  /** Takes in what the controller says. */
+  private fun follow() {
+    val player = controller ?: return
+    val id = player.currentMediaItem.itemId
+    if (id == null || player.playbackState == Player.STATE_IDLE) {
+      nowPlaying = null
+      isPlaying = false
+      return
+    }
+    if (nowPlaying?.id != id) {
+      // Playing something this screen didn't start (the app was away meanwhile).
+      nowPlaying =
+          item(id)
+              ?: Item(
+                  id = id,
+                  feedId = "",
+                  title = player.mediaMetadata.title?.toString() ?: "",
+                  published = 0,
+                  read = false,
+                  starred = false,
+              )
+      chapters = emptyList()
+      launch { loadChapters(id) }
+    }
+    isPlaying = player.isPlaying
+    position = player.currentPosition / 1000.0
+    duration = player.duration.takeIf { it != C.TIME_UNSET && it > 0 }?.let { it / 1000.0 }
+    speed = player.playbackParameters.speed
+    val seconds = position.toInt()
+    if (kotlin.math.abs(seconds - localPosition) >= 15 || !isPlaying) {
+      localPosition = seconds
+      update(id) { it.copy(position = seconds) }
+    }
+  }
+
+  /** Played to the end: the service has told the server; catch up here. */
+  private fun ended() {
+    val item = nowPlaying ?: return
+    controller?.clearMediaItems()
+    nowPlaying = null
+    isPlaying = false
+    chapters = emptyList()
+    finishedHere(item)
+  }
+
+  /** An episode finished (and the server told): read, position forgotten, counts updated. */
+  private fun finishedHere(item: Item) {
+    val wasUnread = !(this.item(item.id) ?: item).read
+    update(item.id) { it.copy(position = 0, read = true) }
+    if (wasUnread) {
+      feeds = feeds.map {
+        if (it.id == item.feedId) it.copy(unread = maxOf(0, it.unread - 1)) else it
+      }
+      updateUnread()
+    }
+  }
+
+  private suspend fun loadChapters(id: Long) {
+    val item = item(id) ?: return
+    if (item.media?.chapters == null) return
+    val loaded = runCatching { api.chapters(id) }.getOrDefault(emptyList())
+    if (nowPlaying?.id == id) chapters = loaded
+  }
+
+  /** Whether [item] is the episode playing (or paused). */
+  fun isCurrent(item: Item): Boolean = nowPlaying?.id == item.id
+
+  /**
+   * Starts an episode (its video, with [video]), resuming where it was left; or, if it is the one
+   * playing that way, pauses or resumes it.
+   */
+  fun play(item: Item, video: Boolean = false) {
+    val player = controller ?: return
+    if (isCurrent(item) && playingVideo == video) {
+      togglePause()
+      return
+    }
+    val media = item.media ?: return
+    val enclosure = (if (video) media.video else media.audio) ?: return
+    val switching = isCurrent(item)
+    // Save the one playing before it is replaced; the service only saves what it plays.
+    nowPlaying?.let { old ->
+      val at = (player.currentPosition / 1000).toInt()
+      update(old.id) { it.copy(position = at) }
+      launch { run { api.setPosition(old.id, at) } }
+    }
+    var start = if (switching) position.toInt() else (this.item(item.id) ?: item).position
+    // Played to the end before: from the top.
+    if (media.duration != null && start >= media.duration - 30) start = 0
+    val feed = feeds.firstOrNull { it.id == item.feedId }
+    val metadata =
+        MediaMetadata.Builder()
+            .setTitle(item.title)
+            .setArtist(feed?.title ?: item.feedId)
+            .setAlbumTitle(feed?.title ?: item.feedId)
+            .apply { (media.image ?: feed?.image)?.let { setArtworkUri(Uri.parse(it)) } }
+            .build()
+    val mediaItem =
+        MediaItem.Builder()
+            .setMediaId(item.id.toString())
+            .setUri(enclosure.url)
+            .setMimeType(enclosure.mime)
+            .setMediaMetadata(metadata)
+            .build()
+    nowPlaying = item
+    playingVideo = video
+    position = start.toDouble()
+    duration = media.duration?.toDouble()
+    localPosition = start
+    chapters = emptyList()
+    player.setMediaItem(mediaItem, start * 1000L)
+    player.prepare()
+    player.play()
+    launch { loadChapters(item.id) }
+  }
+
+  fun togglePause() {
+    val player = controller ?: return
+    if (player.isPlaying) player.pause() else player.play()
+  }
+
+  fun seekTo(seconds: Double) {
+    val player = controller ?: return
+    val to = duration?.let { seconds.coerceIn(0.0, it) } ?: maxOf(0.0, seconds)
+    player.seekTo((to * 1000).toLong())
+    position = to
+  }
+
+  fun skip(forward: Boolean) {
+    val player = controller ?: return
+    if (forward) player.seekForward() else player.seekBack()
+  }
+
+  /** The next chapter, or (`next` false) the start of this one, or the one before near its start. */
+  fun jumpChapter(next: Boolean) {
+    val starts = chapters.filter { !it.hidden }.map { it.start }
+    if (next) {
+      starts.firstOrNull { it > position + 0.5 }?.let { seekTo(it) }
+    } else {
+      seekTo(starts.lastOrNull { it < position - 3 } ?: 0.0)
+    }
+  }
+
+  /** The chapter at the current position. */
+  val chapter: Chapter?
+    get() = chapters.filter { !it.hidden }.lastOrNull { it.start <= position }
+
+  /** Steps through 1×, 1.25×, 1.5×, 1.75×, 2× and 0.75×. */
+  fun nextSpeed() {
+    val player = controller ?: return
+    val speeds = listOf(1f, 1.25f, 1.5f, 1.75f, 2f, 0.75f)
+    val i = speeds.indexOfFirst { kotlin.math.abs(it - speed) < 0.01f }
+    player.setPlaybackSpeed(speeds[(i + 1) % speeds.size])
+  }
+
+  /** Stops playing; the service saves the position as it pauses. */
+  fun stopPlaying() {
+    val player = controller ?: return
+    val item = nowPlaying ?: return
+    val at = (player.currentPosition / 1000).toInt()
+    val nearEnd = duration?.let { position >= it - 30 } ?: false
+    player.pause()
+    player.clearMediaItems()
+    nowPlaying = null
+    isPlaying = false
+    chapters = emptyList()
+    showPlayer = false
+    launch {
+      if (nearEnd) {
+        finished(context, item.id)
+        finishedHere(item)
+      } else {
+        update(item.id) { it.copy(position = at) }
+        run { api.setPosition(item.id, at) }
+      }
+    }
+  }
+
+  suspend fun chapters(item: Item): List<Chapter> =
+      runCatching { api.chapters(item.id) }.getOrDefault(emptyList())
+
+  suspend fun transcript(item: Item): Transcript? {
+    var transcript: Transcript? = null
+    run { transcript = api.transcript(item.id) }
+    return transcript
+  }
+
+  override fun onCleared() {
+    controller?.release()
+    super.onCleared()
   }
 }
