@@ -89,19 +89,19 @@ transfers.
 
 ### Podcasts
 
-Podcast episodes (items with audio or video) are marked in the list: a
-waveform, a half circle once started, a speaker while playing. Their article has
-Play (or "Resume from 12:34"), Video when there is one, and buttons for the
-chapters and transcript. Opening an episode doesn't mark it read; playing it to
-the end (or stopping in its last 30 seconds) does.
+Podcast episodes (items with audio or video) are marked in the list: a waveform,
+a half circle once started, a speaker while playing. Their article has Play (or
+"Resume from 12:34"), Video when there is one, and buttons for the chapters and
+transcript. Opening an episode doesn't mark it read; playing it to the end (or
+stopping in its last 30 seconds) does.
 
 Episodes play in a Media3 (ExoPlayer) media session service, so they keep
 playing with the screen off or the app closed, and the notification, lock
-screen, headphones and Bluetooth controls work. While one plays, a
-bar sits along the bottom; tap it for the full player: video (with Media3's
-full-screen button), a scrubber, back 10 / forward 30 seconds, previous and next
-chapter, the speed (1× to 2×, and 0.75×, keeping the pitch), the chapters and
-the transcript, which follows along and jumps where you tap.
+screen, headphones and Bluetooth controls work. While one plays, a bar sits
+along the bottom; tap it for the full player: video (with Media3's full-screen
+button), a scrubber, back 10 / forward 30 seconds, previous and next chapter,
+the speed (1× to 2×, and 0.75×, keeping the pitch), the chapters and the
+transcript, which follows along and jumps where you tap.
 
 The service saves the position on the server every 15 seconds and on pause, so
 playback resumes where you left off here or in any other pressbox client, even

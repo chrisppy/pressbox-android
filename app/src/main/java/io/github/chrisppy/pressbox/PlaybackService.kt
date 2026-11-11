@@ -65,13 +65,12 @@ class PlaybackService : MediaSessionService() {
           override fun onIsPlayingChanged(isPlaying: Boolean) {
             saving?.cancel()
             if (isPlaying) {
-              saving =
-                  scope.launch {
-                    while (isActive) {
-                      delay(SAVE_EVERY_MS)
-                      save(player)
-                    }
-                  }
+              saving = scope.launch {
+                while (isActive) {
+                  delay(SAVE_EVERY_MS)
+                  save(player)
+                }
+              }
             } else if (player.playbackState != Player.STATE_ENDED) {
               scope.launch { save(player) }
             }

@@ -10,8 +10,8 @@ import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.core.content.edit
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.C
@@ -643,7 +643,9 @@ class Store(app: Application) : AndroidViewModel(app) {
     if (forward) player.seekForward() else player.seekBack()
   }
 
-  /** The next chapter, or (`next` false) the start of this one, or the one before near its start. */
+  /**
+   * The next chapter, or (`next` false) the start of this one, or the one before near its start.
+   */
   fun jumpChapter(next: Boolean) {
     val starts = chapters.filter { !it.hidden }.map { it.start }
     if (next) {
