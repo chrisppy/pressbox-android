@@ -13,6 +13,7 @@ plugins {
 android {
   namespace = "org.red_oxide.pressbox"
   compileSdk = 36
+  buildToolsVersion = "36.0.0"
 
   defaultConfig {
     applicationId = "org.red_oxide.pressbox"
