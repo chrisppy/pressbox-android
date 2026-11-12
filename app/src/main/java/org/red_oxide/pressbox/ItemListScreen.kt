@@ -128,12 +128,12 @@ fun ItemListScreen(store: Store) {
                     value = query,
                     onValueChange = {
                       query = it
-                      if (it.isEmpty() && store.search != null) store.setSearch(null)
+                      if (it.isEmpty() && store.search != null) store.updateSearch(null)
                     },
                     placeholder = { Text("Search titles and text") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(onSearch = { store.setSearch(query) }),
+                    keyboardActions = KeyboardActions(onSearch = { store.updateSearch(query) }),
                     colors =
                         TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,
@@ -157,7 +157,7 @@ fun ItemListScreen(store: Store) {
                     onClick = {
                       searching = false
                       query = ""
-                      if (store.search != null) store.setSearch(null)
+                      if (store.search != null) store.updateSearch(null)
                     }
                 ) {
                   Icon(Icons.Outlined.Close, contentDescription = "Close search")
@@ -187,7 +187,7 @@ fun ItemListScreen(store: Store) {
                     },
                     onClick = {
                       showMenu = false
-                      store.setUnreadOnly(value)
+                      store.updateUnreadOnly(value)
                     },
                 )
               }

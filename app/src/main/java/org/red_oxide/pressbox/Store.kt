@@ -247,12 +247,12 @@ class Store(app: Application) : AndroidViewModel(app) {
     if (source != null) launch { run { loadItems() } }
   }
 
-  fun setUnreadOnly(value: Boolean) = launch {
+  fun updateUnreadOnly(value: Boolean) = launch {
     unreadOnly = value
     run { loadItems() }
   }
 
-  fun setSearch(text: String?) = launch {
+  fun updateSearch(text: String?) = launch {
     search = text?.trim()?.ifEmpty { null }
     run { loadItems() }
   }
@@ -354,7 +354,7 @@ class Store(app: Application) : AndroidViewModel(app) {
   /** Asks the server to pair this device and waits for approval. */
   fun startPairing(newServer: String, name: String) {
     pairJob?.cancel()
-    setServer(newServer)
+    saveServer(newServer)
     pairCode = null
     pairStatus = "Contacting the server…"
     val client = ApiClient(server, null)
@@ -368,7 +368,7 @@ class Store(app: Application) : AndroidViewModel(app) {
           delay(2000)
           val approved = client.pairPoll(start.pollId)
           if (approved != null) {
-            setToken(approved.token)
+            saveToken(approved.token)
             me = null
             pairCode = null
             pairStatus = "Paired as ${approved.name}."
@@ -396,8 +396,8 @@ class Store(app: Application) : AndroidViewModel(app) {
 
   /** Signs in with a token from `pressboxctl add-device` instead of pairing. */
   fun useToken(newServer: String, newToken: String) = launch {
-    setServer(newServer)
-    setToken(newToken)
+    saveServer(newServer)
+    saveToken(newToken)
     me = null
     reload()
     if (errorMessage == null) showSettings = false
@@ -419,7 +419,7 @@ class Store(app: Application) : AndroidViewModel(app) {
   fun forget() {
     controller?.stop()
     controller?.clearMediaItems()
-    setToken("")
+    saveToken("")
     me = null
     serverVersion = null
     feeds = emptyList()
@@ -431,13 +431,13 @@ class Store(app: Application) : AndroidViewModel(app) {
     Unread.cancel(context)
   }
 
-  private fun setServer(value: String) {
+  private fun saveServer(value: String) {
     server = value.trim()
     prefs.edit { putString("server", server) }
     serverVersion = null
   }
 
-  private fun setToken(value: String) {
+  private fun saveToken(value: String) {
     token = value.trim()
     TokenStore.setToken(context, token)
   }
