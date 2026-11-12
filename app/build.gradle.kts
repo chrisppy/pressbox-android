@@ -11,11 +11,11 @@ plugins {
 }
 
 android {
-  namespace = "io.github.chrisppy.pressbox"
+  namespace = "org.red_oxide.pressbox"
   compileSdk = 36
 
   defaultConfig {
-    applicationId = "io.github.chrisppy.pressbox"
+    applicationId = "org.red_oxide.pressbox"
     minSdk = 31
     targetSdk = 36
     // Calendar versions, YYYY.M.PATCH (see CHANGELOG.md); the code is the same

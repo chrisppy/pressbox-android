@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Chris Palmer <chris@red-oxide.org>
 // SPDX-License-Identifier: GPL-3.0-only
 
-package io.github.chrisppy.pressbox
+package org.red_oxide.pressbox
 
 import java.io.IOException
 import java.util.concurrent.TimeUnit

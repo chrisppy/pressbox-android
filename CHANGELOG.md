@@ -14,6 +14,10 @@ through API v1 (`/api/v1`).
 
 ## [2026.11.0] - Unreleased
 
+- The application ID and Kotlin package are now `org.red_oxide.pressbox`
+  (previously `io.github.chrisppy.pressbox`), matching red-oxide.org. Android
+  treats it as a different app, so a build installed under the old ID has to be
+  uninstalled and paired again.
 - Podcasts (needs a pressbox server with podcast support): episodes play in a
   Media3 media session service (background playback, notification, lock screen,
   headphone and Bluetooth controls), resume where any client left off, and are

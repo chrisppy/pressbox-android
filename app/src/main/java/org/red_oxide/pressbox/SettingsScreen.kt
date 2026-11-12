@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Chris Palmer <chris@red-oxide.org>
 // SPDX-License-Identifier: GPL-3.0-only
 
-package io.github.chrisppy.pressbox
+package org.red_oxide.pressbox
 
 import android.Manifest
 import android.os.Build
