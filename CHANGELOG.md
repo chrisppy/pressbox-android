@@ -40,4 +40,4 @@ The first version, matching pressbox-darwin (then pressbox-ios).
 - Birdland colors: Birdland in dark mode, Birdland Light in light mode, and the
   pressbox icon as an adaptive icon with a themed (monochrome) layer.
 
-[2026.11.0]: https://github.com/chrisppy/pressbox-android/releases/tag/v2026.11.0
+[2026.11.0]: https://github.com/red-oxide/pressbox-android/releases/tag/v2026.11.0

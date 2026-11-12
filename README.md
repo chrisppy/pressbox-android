@@ -5,11 +5,11 @@ SPDX-License-Identifier: GPL-3.0-only
 
 # pressbox-android
 
-The Android app for [pressbox](https://github.com/chrisppy/pressbox), a
+The Android app for [pressbox](https://github.com/red-oxide/pressbox), a
 self-hosted feed reader whose feeds and users are declared in NixOS. It reads
 from your pressbox server over its HTTP API (`/api/v1`) and shares read and
 starred state with the other clients, such as the `pressbox` terminal reader and
-[pressbox-darwin](https://github.com/chrisppy/pressbox-darwin).
+[pressbox-darwin](https://github.com/red-oxide/pressbox-darwin).
 
 > [!NOTE]
 > pressbox-android is in its early days. Expect rough edges, and features and
@@ -50,8 +50,8 @@ On first launch, enter the server address and tap "Pair this device". The app
 shows a code like `K7W-4QX`: approve it on the server with
 `sudo pressboxctl approve K7W-4QX`, or from a device that is already paired
 (`pressbox approve K7W-4QX`, or Settings in either app). See pressbox's docs on
-[pairing](https://github.com/chrisppy/pressbox/blob/master/docs/pairing.md) and
-[users](https://github.com/chrisppy/pressbox/blob/master/docs/server.md#users).
+[pairing](https://github.com/red-oxide/pressbox/blob/master/docs/pairing.md) and
+[users](https://github.com/red-oxide/pressbox/blob/master/docs/server.md#users).
 "Use a token instead" takes a token from `pressboxctl add-device`.
 
 The feed list has All items, Starred, a Tags section and the feeds, each with

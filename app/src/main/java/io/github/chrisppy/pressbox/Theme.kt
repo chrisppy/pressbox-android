@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.toArgb
 
-// Birdland colors, from https://github.com/chrisppy/base24-themes: Birdland in
+// Birdland colors, from https://github.com/red-oxide/base24-themes: Birdland in
 // dark mode, Birdland Light in light mode, as in the iOS app. The comments give
 // each color's Base24 slot. Dynamic (wallpaper) color is off on purpose.
 
