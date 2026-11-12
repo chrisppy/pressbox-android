@@ -180,7 +180,9 @@ fun startAt(item: Item): Int {
   return if (duration != null && item.position >= duration - 30) 0 else item.position
 }
 
-/** A media item that plays [item] (its video, with [video]), or `null` if it has nothing to play. */
+/**
+ * A media item that plays [item] (its video, with [video]), or `null` if it has nothing to play.
+ */
 fun mediaItem(
     item: Item,
     feed: Feed?,

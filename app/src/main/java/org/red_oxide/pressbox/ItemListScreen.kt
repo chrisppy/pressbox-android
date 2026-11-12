@@ -394,7 +394,12 @@ private fun QueueMenu(store: Store, item: Item, expanded: Boolean, onDismiss: ()
 }
 
 @Composable
-private fun QueueChoice(label: String, icon: ImageVector, onDismiss: () -> Unit, action: () -> Unit) {
+private fun QueueChoice(
+    label: String,
+    icon: ImageVector,
+    onDismiss: () -> Unit,
+    action: () -> Unit,
+) {
   DropdownMenuItem(
       text = { Text(label) },
       leadingIcon = { Icon(icon, contentDescription = null) },
