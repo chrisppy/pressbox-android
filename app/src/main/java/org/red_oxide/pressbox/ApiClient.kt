@@ -137,6 +137,8 @@ class ApiClient(private val server: String, private val token: String?) {
     when (source) {
       Source.All -> {}
       Source.Starred -> query += "starred" to "true"
+      // Searching from Up Next searches everything.
+      Source.UpNext -> {}
       is Source.OfFeed -> query += "feed" to source.id
       is Source.Tagged -> query += "tag" to source.tag
     }
@@ -183,6 +185,18 @@ class ApiClient(private val server: String, private val token: String?) {
       } catch (_: ApiException.NotFound) {
         null
       }
+
+  /** The Up Next queue, in order; `null` from a server without one. */
+  suspend fun queue(): List<Item>? =
+      try {
+        decode<Queue>(send("GET", "/api/v1/queue")).items
+      } catch (_: ApiException.NotFound) {
+        null
+      }
+
+  /** Replaces the Up Next queue with [ids], in order; returns what the server kept. */
+  suspend fun setQueue(ids: List<Long>): List<Item> =
+      decode<Queue>(send("PUT", "/api/v1/queue", body = encode(QueueOrder(ids)))).items
 
   suspend fun markFeedRead(feed: String): Int =
       decode<Updated>(send("POST", "/api/v1/feeds/${pathSegment(feed)}/read-all")).updated

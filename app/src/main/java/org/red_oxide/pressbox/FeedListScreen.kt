@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Label
+import androidx.compose.material.icons.automirrored.outlined.PlaylistPlay
 import androidx.compose.material.icons.outlined.AllInbox
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.RssFeed
@@ -69,6 +70,10 @@ fun FeedListScreen(store: Store) {
       LazyColumn(Modifier.fillMaxSize()) {
         row(store, Source.All, "All items", Icons.Outlined.AllInbox, store.totalUnread)
         row(store, Source.Starred, "Starred", Icons.Outlined.StarOutline, 0)
+        // Servers without a queue: no Up Next.
+        store.queue?.let { queue ->
+          row(store, Source.UpNext, "Up Next", Icons.AutoMirrored.Outlined.PlaylistPlay, queue.size)
+        }
         val tags = store.tags
         if (tags.isNotEmpty()) {
           header("Tags")

@@ -19,6 +19,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.material.icons.automirrored.filled.PlaylistAddCheck
 import androidx.compose.material.icons.filled.Forward30
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -111,6 +113,17 @@ fun EpisodeHeader(store: Store, item: Item) {
       if (media.transcripts.isNotEmpty()) {
         IconButton(onClick = { showTranscript = true }) {
           Icon(Icons.Outlined.ClosedCaption, contentDescription = "Transcript")
+        }
+      }
+      // Servers without a queue: no Up Next.
+      if (store.queue != null) {
+        val queued = store.isQueued(item)
+        IconButton(onClick = { if (queued) store.dequeue(item) else store.enqueue(item) }) {
+          Icon(
+              if (queued) Icons.AutoMirrored.Filled.PlaylistAddCheck
+              else Icons.AutoMirrored.Filled.PlaylistAdd,
+              contentDescription = if (queued) "Remove from Up Next" else "Add to Up Next",
+          )
         }
       }
     }

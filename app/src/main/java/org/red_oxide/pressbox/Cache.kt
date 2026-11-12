@@ -20,6 +20,8 @@ data class Snapshot(
     val feeds: List<Feed> = emptyList(),
     val items: List<Item> = emptyList(),
     val articles: Map<Long, Item> = emptyMap(),
+    /** The Up Next queue; `null` if the server has none. */
+    val queue: List<Item>? = null,
 )
 
 object Cache {

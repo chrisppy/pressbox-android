@@ -25,6 +25,12 @@ through API v1 (`/api/v1`).
   player with video, scrubbing, 10/30-second skips, chapters, speeds that keep
   the pitch and a transcript that follows along. The service saves the position
   every 15 seconds and on pause. Opening an episode no longer marks it read.
+- Up Next (needs a pressbox server with a queue): episodes to play one after
+  another, kept on the server so every client shares it. Hold an episode for
+  Play next, Play last or Remove (and Move up or down in Up Next), or use the
+  button above its article; Up Next is listed under Starred. When an episode
+  ends, the service carries on into the first one in Up Next without a gap, even
+  with the app's screens closed, and finished episodes leave it.
 
 The first version, matching pressbox-darwin (then pressbox-ios).
 

@@ -107,6 +107,14 @@ The service saves the position on the server every 15 seconds and on pause, so
 playback resumes where you left off here or in any other pressbox client, even
 if the app's screens were closed while it played.
 
+Up Next (needs a pressbox server with a queue) lists the episodes to play one
+after another, under Starred in the feed list. Hold an episode in a list for
+Play next, Play last or Remove from Up Next (and, in Up Next, Move up and Move
+down), or use the button above its article. When an episode ends, the first one
+in Up Next starts without a gap, resuming where it was left, and the finished
+one leaves Up Next. The queue is kept on the server, so every pressbox client
+shares it.
+
 ## Development
 
 ```sh

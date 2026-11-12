@@ -6,7 +6,6 @@ package org.red_oxide.pressbox
 import android.app.Application
 import android.content.ComponentName
 import android.content.Context
-import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -16,7 +15,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
@@ -67,6 +65,10 @@ class Store(app: Application) : AndroidViewModel(app) {
 
   /** Full articles opened or prefetched, for offline reading. */
   private var articles: Map<Long, Item> = emptyMap()
+
+  /** The episodes to play next, in order, as the server keeps them; `null` if it has no queue. */
+  var queue by mutableStateOf<List<Item>?>(null)
+    private set
 
   // Pairing in progress: the code to show the user.
   var pairCode by mutableStateOf<String?>(null)
@@ -146,6 +148,7 @@ class Store(app: Application) : AndroidViewModel(app) {
       feeds = it.feeds
       items = it.items
       articles = it.articles
+      queue = it.queue
     }
     if (!isConfigured) showSettings = true
     connectPlayer()
@@ -173,13 +176,15 @@ class Store(app: Application) : AndroidViewModel(app) {
       when (source) {
         Source.All -> "All items"
         Source.Starred -> "Starred"
+        Source.UpNext -> "Up Next"
         is Source.OfFeed -> feedTitle(source.id)
         is Source.Tagged -> source.tag
       }
 
   fun feedTitle(id: String): String = feeds.firstOrNull { it.id == id }?.title ?: id
 
-  fun item(id: Long): Item? = items.firstOrNull { it.id == id } ?: articles[id]
+  fun item(id: Long): Item? =
+      items.firstOrNull { it.id == id } ?: articles[id] ?: queue?.firstOrNull { it.id == id }
 
   /** Runs a request, showing any error instead of throwing it. */
   private suspend fun run(body: suspend () -> Unit) {
@@ -200,7 +205,7 @@ class Store(app: Application) : AndroidViewModel(app) {
   }
 
   private fun saveCache() {
-    Cache.save(context, viewModelScope, Snapshot(feeds, items, articles))
+    Cache.save(context, viewModelScope, Snapshot(feeds, items, articles, queue))
   }
 
   private fun launch(body: suspend () -> Unit) {
@@ -218,6 +223,8 @@ class Store(app: Application) : AndroidViewModel(app) {
     try {
       run {
         feeds = api.feeds()
+        queue = api.queue()
+        syncNext()
         loadItems()
         if (me == null) me = api.me()
         // Older servers don't have the endpoint; that's not an error.
@@ -231,8 +238,18 @@ class Store(app: Application) : AndroidViewModel(app) {
     prefetchUnread()
   }
 
+  /** The item list is Up Next (not a search from it). */
+  val showingQueue: Boolean
+    get() = source == Source.UpNext && search == null
+
   private suspend fun loadItems() {
     val source = source ?: return
+    if (showingQueue) {
+      queue = api.queue()
+      items = queue.orEmpty()
+      nextPage = null
+      return
+    }
     val page = api.items(source, unreadOnly, search)
     items = page.items
     nextPage = page.next
@@ -309,6 +326,8 @@ class Store(app: Application) : AndroidViewModel(app) {
     run {
       api.setRead(item.id, value)
       update(item.id) { it.copy(read = value) }
+      // As on the server: read items leave Up Next.
+      if (value) leaveQueue(item.id)
       feeds = feeds.map {
         if (it.id == item.feedId) it.copy(unread = maxOf(0, it.unread + if (value) -1 else 1))
         else it
@@ -346,6 +365,7 @@ class Store(app: Application) : AndroidViewModel(app) {
 
   private fun update(id: Long, change: (Item) -> Item) {
     items = items.map { if (it.id == id) change(it) else it }
+    queue = queue?.map { if (it.id == id) change(it) else it }
     articles[id]?.let { articles = articles + (id to change(it)) }
   }
 
@@ -425,6 +445,7 @@ class Store(app: Application) : AndroidViewModel(app) {
     feeds = emptyList()
     items = emptyList()
     articles = emptyMap()
+    queue = null
     source = null
     selectedItem = null
     Cache.clear(context)
@@ -492,9 +513,17 @@ class Store(app: Application) : AndroidViewModel(app) {
                 override fun onPlaybackStateChanged(state: Int) {
                   if (state == Player.STATE_ENDED) ended()
                 }
+
+                override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                  // Played to the end and on to the next in Up Next; the service told the server.
+                  if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
+                    nowPlaying?.let { finishedHere(it) }
+                  }
+                }
               }
           )
           follow()
+          syncNext()
           // The position moves without events; follow it about once a second.
           viewModelScope.launch {
             while (true) {
@@ -559,6 +588,7 @@ class Store(app: Application) : AndroidViewModel(app) {
   private fun finishedHere(item: Item) {
     val wasUnread = !(this.item(item.id) ?: item).read
     update(item.id) { it.copy(position = 0, read = true) }
+    leaveQueue(item.id)
     if (wasUnread) {
       feeds = feeds.map {
         if (it.id == item.feedId) it.copy(unread = maxOf(0, it.unread - 1)) else it
@@ -588,39 +618,24 @@ class Store(app: Application) : AndroidViewModel(app) {
       return
     }
     val media = item.media ?: return
-    val enclosure = (if (video) media.video else media.audio) ?: return
     val switching = isCurrent(item)
+    // Switching between an episode's audio and video carries on from where the other was.
+    val start = if (switching) position.toInt() else startAt(this.item(item.id) ?: item)
+    val feed = feeds.firstOrNull { it.id == item.feedId }
+    val toPlay = mediaItem(item, feed, video, start) ?: return
     // Save the one playing before it is replaced; the service only saves what it plays.
     nowPlaying?.let { old ->
       val at = (player.currentPosition / 1000).toInt()
       update(old.id) { it.copy(position = at) }
       launch { run { api.setPosition(old.id, at) } }
     }
-    var start = if (switching) position.toInt() else (this.item(item.id) ?: item).position
-    // Played to the end before: from the top.
-    if (media.duration != null && start >= media.duration - 30) start = 0
-    val feed = feeds.firstOrNull { it.id == item.feedId }
-    val metadata =
-        MediaMetadata.Builder()
-            .setTitle(item.title)
-            .setArtist(feed?.title ?: item.feedId)
-            .setAlbumTitle(feed?.title ?: item.feedId)
-            .apply { (media.image ?: feed?.image)?.let { setArtworkUri(Uri.parse(it)) } }
-            .build()
-    val mediaItem =
-        MediaItem.Builder()
-            .setMediaId(item.id.toString())
-            .setUri(enclosure.url)
-            .setMimeType(enclosure.mime)
-            .setMediaMetadata(metadata)
-            .build()
     nowPlaying = item
     playingVideo = video
     position = start.toDouble()
     duration = media.duration?.toDouble()
     localPosition = start
     chapters = emptyList()
-    player.setMediaItem(mediaItem, start * 1000L)
+    player.setMediaItem(toPlay, start * 1000L)
     player.prepare()
     player.play()
     launch { loadChapters(item.id) }
@@ -688,6 +703,61 @@ class Store(app: Application) : AndroidViewModel(app) {
         run { api.setPosition(item.id, at) }
       }
     }
+  }
+
+  // Up Next
+
+  fun isQueued(item: Item): Boolean = queue.orEmpty().any { it.id == item.id }
+
+  /** Adds an episode to Up Next: to play next, or after the rest. Moves it if it is there. */
+  fun enqueue(item: Item, next: Boolean = false) {
+    val rest = queue.orEmpty().filter { it.id != item.id }
+    setQueue(if (next) listOf(item) + rest else rest + item)
+  }
+
+  fun dequeue(item: Item) = setQueue(queue.orEmpty().filter { it.id != item.id })
+
+  /** Moves an episode one place later ([by] 1) or earlier (-1) in Up Next. */
+  fun moveInQueue(item: Item, by: Int) {
+    val list = queue.orEmpty().toMutableList()
+    val from = list.indexOfFirst { it.id == item.id }
+    val to = from + by
+    if (from < 0 || to !in list.indices) return
+    list.add(to, list.removeAt(from))
+    setQueue(list)
+  }
+
+  /** Replaces Up Next: here at once, then as the server keeps it (or back, if it fails). */
+  private fun setQueue(new: List<Item>) {
+    val old = queue
+    show(new)
+    launch {
+      var kept: List<Item>? = null
+      run { kept = api.setQueue(new.map { it.id }) }
+      show(kept ?: old)
+    }
+  }
+
+  private fun show(new: List<Item>?) {
+    queue = new
+    if (showingQueue) items = new.orEmpty()
+    syncNext()
+    saveCache()
+  }
+
+  /** Takes an episode out of Up Next here (the server already has). */
+  private fun leaveQueue(id: Long) {
+    if (queue.orEmpty().none { it.id == id }) return
+    queue = queue?.filter { it.id != id }
+    if (showingQueue) items = items.filter { it.id != id }
+  }
+
+  /** Tells the player what follows the episode playing: the first in Up Next. */
+  private fun syncNext() {
+    val player = controller ?: return
+    val playing = player.currentMediaItem.itemId ?: return
+    val next = queue.orEmpty().firstOrNull { it.id != playing }
+    player.followWith(next?.let { mediaItem(it, feeds.firstOrNull { f -> f.id == it.feedId }) })
   }
 
   suspend fun chapters(item: Item): List<Chapter> =

@@ -142,6 +142,12 @@ sealed interface NextPage {
   data class Offset(val offset: Int) : NextPage
 }
 
+/** `GET /api/v1/queue`: the Up Next queue, in order. */
+@Serializable data class Queue(val items: List<Item>)
+
+/** Body for `PUT /api/v1/queue`: the whole queue, in order. */
+@Serializable data class QueueOrder(val ids: List<Long>)
+
 @Serializable data class Flag(val value: Boolean)
 
 @Serializable data class Updated(val updated: Int)
@@ -172,6 +178,9 @@ sealed interface Source {
   data object All : Source
 
   data object Starred : Source
+
+  /** The Up Next queue, in playing order. */
+  data object UpNext : Source
 
   data class OfFeed(val id: String) : Source
 

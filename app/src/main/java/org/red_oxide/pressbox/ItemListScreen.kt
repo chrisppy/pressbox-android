@@ -5,7 +5,7 @@ package org.red_oxide.pressbox
 
 import android.text.format.DateUtils
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,14 +24,19 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.automirrored.outlined.PlaylistAdd
+import androidx.compose.material.icons.automirrored.outlined.PlaylistPlay
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.ArrowDownward
+import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.DoneAll
 import androidx.compose.material.icons.outlined.FilterList
+import androidx.compose.material.icons.outlined.PlaylistRemove
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.StarOutline
@@ -68,6 +73,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
@@ -172,7 +178,10 @@ fun ItemListScreen(store: Store) {
           Action(
               "Mark all as read",
               Icons.Outlined.DoneAll,
-              enabled = store.source != Source.Starred && store.items.isNotEmpty(),
+              enabled =
+                  store.source != Source.Starred &&
+                      store.source != Source.UpNext &&
+                      store.items.isNotEmpty(),
           ) {
             store.markAllRead()
           }
@@ -211,8 +220,12 @@ fun ItemListScreen(store: Store) {
       }
       if (store.items.isEmpty() && !store.isLoading) {
         EmptyState(
-            if (store.search != null) "No results for “${store.search}”"
-            else if (store.unreadOnly) "All caught up" else "No items"
+            when {
+              store.search != null -> "No results for “${store.search}”"
+              store.showingQueue -> "Up Next is empty. Hold an episode to add it."
+              store.unreadOnly -> "All caught up"
+              else -> "No items"
+            }
         )
       }
       Box(Modifier.align(Alignment.BottomCenter)) {
@@ -246,12 +259,17 @@ private fun EmptyState(text: String) {
   }
 }
 
-/** A row that toggles read when swiped right and starred when swiped left. */
+/**
+ * A row that toggles read when swiped right and starred when swiped left. Holding an episode opens
+ * its Up Next menu.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SwipeableRow(store: Store, item: Item) {
   val palette = Theme.palette
   val current by rememberUpdatedState(item)
+  var showQueueMenu by remember { mutableStateOf(false) }
+  val canQueue = item.isEpisode && store.queue != null
   val state =
       rememberSwipeToDismissBoxState(
           confirmValueChange = { value ->
@@ -298,28 +316,93 @@ private fun SwipeableRow(store: Store, item: Item) {
         }
       },
   ) {
-    ItemRow(
-        item = item,
-        feedTitle = store.feedTitle(item.feedId),
-        selected = store.selectedItem == item.id,
-        playing = store.isCurrent(item),
-        modifier =
-            Modifier.clickable { store.selectedItem = item.id }
-                .semantics {
-                  customActions =
-                      listOf(
+    Box {
+      ItemRow(
+          item = item,
+          feedTitle = store.feedTitle(item.feedId),
+          selected = store.selectedItem == item.id,
+          playing = store.isCurrent(item),
+          queued = store.isQueued(item),
+          modifier =
+              Modifier.combinedClickable(
+                      onClick = { store.selectedItem = item.id },
+                      onLongClickLabel = if (canQueue) "Up Next" else null,
+                      onLongClick = if (canQueue) ({ showQueueMenu = true }) else null,
+                  )
+                  .semantics {
+                    customActions = buildList {
+                      add(
                           CustomAccessibilityAction(if (item.read) "Mark unread" else "Mark read") {
                             store.setReadAsync(item, !item.read)
                             true
-                          },
+                          }
+                      )
+                      add(
                           CustomAccessibilityAction(if (item.starred) "Unstar" else "Star") {
                             store.setStarred(item, !item.starred)
                             true
-                          },
+                          }
                       )
-                },
-    )
+                      if (canQueue) {
+                        add(
+                            CustomAccessibilityAction(
+                                if (store.isQueued(item)) "Remove from Up Next"
+                                else "Add to Up Next"
+                            ) {
+                              if (store.isQueued(item)) store.dequeue(item) else store.enqueue(item)
+                              true
+                            }
+                        )
+                        add(
+                            CustomAccessibilityAction("Play next") {
+                              store.enqueue(item, next = true)
+                              true
+                            }
+                        )
+                      }
+                    }
+                  },
+      )
+      QueueMenu(store, item, expanded = showQueueMenu, onDismiss = { showQueueMenu = false })
+    }
   }
+}
+
+/** Play next, play last, and (in Up Next) move or remove. */
+@Composable
+private fun QueueMenu(store: Store, item: Item, expanded: Boolean, onDismiss: () -> Unit) {
+  DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+    QueueChoice("Play next", Icons.AutoMirrored.Outlined.PlaylistPlay, onDismiss) {
+      store.enqueue(item, next = true)
+    }
+    if (!store.isQueued(item)) {
+      QueueChoice("Play last", Icons.AutoMirrored.Outlined.PlaylistAdd, onDismiss) {
+        store.enqueue(item)
+      }
+      return@DropdownMenu
+    }
+    if (store.showingQueue) {
+      QueueChoice("Move up", Icons.Outlined.ArrowUpward, onDismiss) { store.moveInQueue(item, -1) }
+      QueueChoice("Move down", Icons.Outlined.ArrowDownward, onDismiss) {
+        store.moveInQueue(item, 1)
+      }
+    }
+    QueueChoice("Remove from Up Next", Icons.Outlined.PlaylistRemove, onDismiss) {
+      store.dequeue(item)
+    }
+  }
+}
+
+@Composable
+private fun QueueChoice(label: String, icon: ImageVector, onDismiss: () -> Unit, action: () -> Unit) {
+  DropdownMenuItem(
+      text = { Text(label) },
+      leadingIcon = { Icon(icon, contentDescription = null) },
+      onClick = {
+        onDismiss()
+        action()
+      },
+  )
 }
 
 @Composable
@@ -329,6 +412,8 @@ fun ItemRow(
     selected: Boolean,
     modifier: Modifier = Modifier,
     playing: Boolean = false,
+    /** In Up Next. */
+    queued: Boolean = false,
 ) {
   val palette = Theme.palette
   Column(
@@ -368,6 +453,15 @@ fun ItemRow(
                   item.position > 0 -> "Started"
                   else -> "Episode"
                 },
+            tint = palette.accent,
+            modifier = Modifier.size(14.dp),
+        )
+        Spacer(Modifier.width(6.dp))
+      }
+      if (queued) {
+        Icon(
+            Icons.AutoMirrored.Outlined.PlaylistPlay,
+            contentDescription = "In Up Next",
             tint = palette.accent,
             modifier = Modifier.size(14.dp),
         )
