@@ -5,12 +5,11 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 -->
 <!-- The logo from assets/app-icon.svg (a 256 unit square), scaled to 75%
      about the centre so home plate's corners stay inside the adaptive
-     icon's safe zone. -->
+     icon's safe zone. One color for themed icons, so the headlines are cut
+     out of the filled plate (even-odd fill) rather than drawn on it. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="256" android:viewportHeight="256">
   <group android:pivotX="128" android:pivotY="128" android:scaleX="0.75" android:scaleY="0.75">
-    <path android:pathData="M60,60 H196 V128 L128,196 L60,128 Z" android:strokeColor="#FFFFFF" android:strokeWidth="14" android:strokeLineJoin="round"/>
-    <path android:pathData="M88,98 H168" android:strokeColor="#FFFFFF" android:strokeWidth="13" android:strokeLineCap="round"/>
-    <path android:pathData="M98,124 H158" android:strokeColor="#FFFFFF" android:strokeWidth="13" android:strokeLineCap="round"/>
-    <path android:pathData="M112,150 H144" android:strokeColor="#FFFFFF" android:strokeWidth="13" android:strokeLineCap="round"/>
+    <path android:pathData="M53,53 H203 V129 L128,204 L53,129 Z M88,91 H168 A7,7 0 0 1 168,105 H88 A7,7 0 0 1 88,91 Z M98,118 H158 A7,7 0 0 1 158,132 H98 A7,7 0 0 1 98,118 Z M112,145 H144 A7,7 0 0 1 144,159 H112 A7,7 0 0 1 112,145 Z" android:fillColor="#FFFFFF" android:fillType="evenOdd"/>
+    <path android:pathData="M53,53 H203 V129 L128,204 L53,129 Z" android:strokeColor="#FFFFFF" android:strokeWidth="10" android:strokeLineJoin="round"/>
   </group>
 </vector>

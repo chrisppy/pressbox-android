@@ -3,9 +3,10 @@
 SPDX-FileCopyrightText: 2026 Chris Palmer <chris@red-oxide.org>
 SPDX-License-Identifier: CC-BY-SA-4.0
 -->
-<!-- Status bar icon for the unread count: home plate with headlines, in
-     white, as notification icons must be. -->
+<!-- Status bar icon for the unread count: the filled home plate with the
+     headlines cut out of it, in white, as notification icons must be. The
+     cut-outs are wider than in the logo so they still show at 24dp. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="256" android:viewportHeight="256">
-  <path android:pathData="M60,60 H196 V128 L128,196 L60,128 Z" android:strokeColor="#FFFFFF" android:strokeWidth="18" android:strokeLineJoin="round"/>
-  <path android:pathData="M88,98 H168 M98,124 H158 M112,150 H144" android:strokeColor="#FFFFFF" android:strokeWidth="16" android:strokeLineCap="round"/>
+  <path android:pathData="M53,53 H203 V129 L128,204 L53,129 Z M88,89 H168 A9,9 0 0 1 168,107 H88 A9,9 0 0 1 88,89 Z M98,116 H158 A9,9 0 0 1 158,134 H98 A9,9 0 0 1 98,116 Z M112,143 H144 A9,9 0 0 1 144,161 H112 A9,9 0 0 1 112,143 Z" android:fillColor="#FFFFFF" android:fillType="evenOdd"/>
+  <path android:pathData="M53,53 H203 V129 L128,204 L53,129 Z" android:strokeColor="#FFFFFF" android:strokeWidth="10" android:strokeLineJoin="round"/>
 </vector>

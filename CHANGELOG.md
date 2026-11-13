@@ -14,6 +14,9 @@ through API v1 (`/api/v1`).
 
 ## [2026.11.0] - Unreleased
 
+- The app icon's home plate is filled rather than outlined, as on iOS. The
+  themed icon and the notification icon cut the headlines out of the filled
+  plate, since they are one color.
 - The application ID and Kotlin package are now `org.red_oxide.pressbox`
   (previously `io.github.chrisppy.pressbox`), matching red-oxide.org. Android
   treats it as a different app, so a build installed under the old ID has to be
