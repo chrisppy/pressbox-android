@@ -1,6 +1,7 @@
 <!--
-SPDX-FileCopyrightText: 2026 Chris Palmer <chris@red-oxide.org> SPDX-License-Identifier:
-GPL-3.0-only -->
+SPDX-FileCopyrightText: 2026 Chris Palmer <chris@red-oxide.org>
+SPDX-License-Identifier: GPL-3.0-only
+-->
 
 # Changelog
 
@@ -8,8 +9,9 @@ All notable changes to pressbox-android. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions are
 [calendar versions](https://calver.org/), `YY.MINOR.PATCH`: the year of the
 release, then a count of that year's releases and a count of fixes to each, both
-starting at 0 (26.0.0, then 26.0.1 for a fix, 26.1.0, and 27.0.0 in January). The app is versioned on its own; it talks to pressbox servers
-through API v1 (`/api/v1`).
+starting at 0 (26.0.0, then 26.0.1 for a fix, 26.1.0, and 27.0.0 in January).
+The app is versioned on its own; it talks to pressbox servers through API v1
+(`/api/v1`).
 
 ## [26.0.0] - Unreleased
 
