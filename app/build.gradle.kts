@@ -19,10 +19,11 @@ android {
     applicationId = "org.red_oxide.pressbox"
     minSdk = 31
     targetSdk = 36
-    // Calendar versions, YYYY.M.PATCH (see CHANGELOG.md); the code is the same
-    // as digits, YYYYMMPP, so it always increases.
-    versionCode = 20261100
-    versionName = "2026.11.0"
+    // Calendar versions, YY.MINOR.PATCH (see CHANGELOG.md); the code is the
+    // same as digits, MINOR and PATCH three each (26.1.2 is 26001002), so it
+    // always increases, and is above the codes of the old YYYY.M.PATCH scheme.
+    versionCode = 26000000
+    versionName = "26.0.0"
   }
 
   buildTypes {

@@ -138,9 +138,10 @@ just verify    # check formatting, then nix flake check (formatting, reuse lint)
 | `Theme.kt` | Birdland colors |
 
 Changes are recorded in [CHANGELOG.md](CHANGELOG.md). Versions are calendar
-versions, `YYYY.M.PATCH` (2026.11.0, then 2026.11.1, 2026.12.0). A release sets
-`versionName` in `app/build.gradle.kts` to it and `versionCode` to the same as
-digits, `YYYYMMPP` (20261100), and is tagged `vYYYY.M.PATCH`.
+versions, `YY.MINOR.PATCH` (26.0.0, then 26.0.1, 26.1.0, and 27.0.0 in
+January). A release sets `versionName` in `app/build.gradle.kts` to it and
+`versionCode` to the same as digits, with MINOR and PATCH as three each
+(26000000 for 26.0.0, 26001002 for 26.1.2), and is tagged `vYY.MINOR.PATCH`.
 
 ## License
 
